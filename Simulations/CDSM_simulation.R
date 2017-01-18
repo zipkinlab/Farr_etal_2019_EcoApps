@@ -1,0 +1,393 @@
+#---------------------------------------------------------#
+#----Simulation for Community Distance Sampling Model.----#
+#----Data is simmulated for actual sampling design of-----#
+#----transects. Transects were imported as shapefiles.----#
+#----Script lasted edited by Matthew Farr (1/18/17)-------#
+#---------------------------------------------------------#
+
+#-----------------------#
+#-Set Working Directory-#
+#-----------------------#
+
+setwd("C:/Users/farrm/Documents/GitHub/CDSM/Simulations")
+
+#---------------#
+#-Load Libaries-#
+#---------------#
+
+library(rgdal)
+library(sp)
+library(dplyr)
+library(tidyr)
+
+#----------------------------#
+#-Import Transect Shapefiles-#
+#----------------------------#
+
+#Directory for entire transect shapefile
+d.dir <- "C:/Users/farrm/OneDrive/Hyena Project/datasets/NewDatasets/Rscripts/ExcelFiles"
+
+#Entire Transect
+EL <- readOGR(dsn = d.dir, layer = "EL_Data")
+
+#Directory for transects by site shapefile
+d.dir <- "C:/Users/farrm/OneDrive/Hyena Project/datasets/NewDatasets/Rscripts/ExcelFiles/Site"
+
+#Transects by site
+Site1 <- readOGR(dsn = d.dir, layer = "Site1")
+Site2 <- readOGR(dsn = d.dir, layer = "Site2")
+Site3 <- readOGR(dsn = d.dir, layer = "Site3")
+Site4 <- readOGR(dsn = d.dir, layer = "Site4")
+Site5 <- readOGR(dsn = d.dir, layer = "Site5")
+Site6 <- readOGR(dsn = d.dir, layer = "Site6")
+Site7 <- readOGR(dsn = d.dir, layer = "Site7")
+Site8 <- readOGR(dsn = d.dir, layer = "Site8")
+Site9 <- readOGR(dsn = d.dir, layer = "Site9")
+Site10 <- readOGR(dsn = d.dir, layer = "Site10")
+Site11 <- readOGR(dsn = d.dir, layer = "Site11")
+Site12 <- readOGR(dsn = d.dir, layer = "Site12")
+Site13 <- readOGR(dsn = d.dir, layer = "Site13")
+Site14 <- readOGR(dsn = d.dir, layer = "Site14")
+Site15 <- readOGR(dsn = d.dir, layer = "Site15")
+Site16 <- readOGR(dsn = d.dir, layer = "Site16")
+Site17 <- readOGR(dsn = d.dir, layer = "Site17")
+
+#-----------------------------------#
+#-Sample Coordinates from Transects-#
+#-----------------------------------#
+
+regpoints <- spsample(EL, 200, type = "regular")
+s1p <- spsample(Site1, 15, type = "regular")
+s2p <- spsample(Site2, 15, type = "regular")
+s3p <- spsample(Site3, 15, type = "regular")
+s4p <- spsample(Site4, 15, type = "regular")
+s5p <- spsample(Site5, 15, type = "regular")
+s6p <- spsample(Site6, 15, type = "regular")
+s7p <- spsample(Site7, 15, type = "regular")
+s8p <- spsample(Site8, 15, type = "regular")
+s9p <- spsample(Site9, 15, type = "regular")
+s10p <- spsample(Site10, 15, type = "regular")
+s11p <- spsample(Site11, 15, type = "regular")
+s12p <- spsample(Site12, 15, type = "regular")
+s13p <- spsample(Site13, 15, type = "regular")
+s14p <- spsample(Site14, 15, type = "regular")
+s15p <- spsample(Site15, 15, type = "regular")
+s16p <- spsample(Site16, 15, type = "regular")
+s17p <- spsample(Site17, 15, type = "regular")
+
+#--------------------------#
+#-Combine Site Coordinates-#
+#--------------------------#
+
+#Easting
+X <- c(s1p@coords[,1], s2p@coords[,1], s3p@coords[,1], s4p@coords[,1], 
+       s5p@coords[,1], s6p@coords[,1], s7p@coords[,1], s8p@coords[,1],
+       s9p@coords[,1], s10p@coords[,1], s11p@coords[,1], s12p@coords[,1],
+       s13p@coords[,1], s14p@coords[,1], s15p@coords[,1], s16p@coords[,1],
+       s17p@coords[,1])
+
+#Northing
+Y <- c(s1p@coords[,2], s2p@coords[,2], s3p@coords[,2], s4p@coords[,2], 
+       s5p@coords[,2], s6p@coords[,2], s7p@coords[,2], s8p@coords[,2],
+       s9p@coords[,2], s10p@coords[,2], s11p@coords[,2], s12p@coords[,2],
+       s13p@coords[,2], s14p@coords[,2], s15p@coords[,2], s16p@coords[,2],
+       s17p@coords[,2])
+
+#--------------------------#
+#-Create Sampling Boundary-#
+#--------------------------#
+
+#Easting
+xlim <- c(715304, 752393)
+
+#Northing
+ylim <- c(9831970, 9857296)
+
+#---------------------------#
+#-Simulate Parameter Values-#
+#---------------------------#
+
+#Number of groups
+N <- 1000
+
+#Simulate coordinates of groups
+u1 <- runif(N, xlim[1], xlim[2]) 
+u2 <- runif(N, ylim[1], ylim[2])
+
+#Group size
+lambda.group <- 2
+gs <- rpois(N, lambda.group) + 1
+
+#Abundance
+Ntotal <- sum(gs)
+
+#Half Normal Detection Parameter
+sigma <- 300
+
+#-------------------#
+#-Initialize Values-#
+#-------------------#
+
+J <- length(X)
+si <- seq(0, 255, 15) #site ID
+di <- seq(0,650,25) #distance ID
+nsites <- 17
+ndst <- length(di) - 1
+dclass <- rep(NA, N)
+dst <- rep(NA, N)
+q <- rep(NA, N)
+site <- rep(NA, N)
+
+#Distance Value Matrix N x J
+d <- array(NA, dim = c(N, J))
+
+#Presence Absence
+y <- rep(NA, N)
+
+#Index
+index <- rep(NA, N)
+
+#Simulate distances, detection probability, and presence/absence
+for(i in 1:N){
+  for(j in 1:J){
+    d[i,j] <- sqrt((u1[i] - X[j])^2 + (u2[i] - Y[j])^2)
+  }
+  dst[i] <- min(d[i,])
+  q[i] <- which.min(d[i,])
+  for(j in 1:nsites){
+    if(si[j] < q[i] && q[i] <= si[j+1])
+      site[i] <- j
+  }
+  if(dst[i] < 650)
+  y[i] <- 1
+  index[i] <- i
+}
+
+Data_Tot <- cbind(y, index, u1, u2, site)
+Data_650 <- Data_Tot[complete.cases(Data_Tot),]
+
+Nwithin <- length(Data_650[,1])
+
+index <- index[y==1]
+index <- index[!is.na(index)]
+
+#Detection Probability
+p <- NULL
+
+ncap <- rep(NA, Nwithin)
+
+#Distance Class
+dclass <- rep(NA, Nwithin)
+
+for(i in 1:Nwithin){
+  p[i] <- exp(-dst[index[i]] * dst[index[i]] / (2 * sigma * sigma))
+  ncap[i] <- rbinom(1, 1, p[i])
+  for(k in 1:ndst){
+    if(di[k] < dst[index[i]] && dst[index[i]] <= di[k+1])
+      dclass[i] <- k
+  }
+}
+
+Data_650 <- cbind(Data_650[,2:5],dclass, p, ncap)
+for(i in 1:Nwithin){
+  if(Data_650[i,7] == 0)
+    Data_650[i,7] <- NA
+}
+
+Data_cap <- Data_650[complete.cases(Data_650),]
+
+
+
+
+
+y.new <- table(Data_cap[,4])
+y.new <- as.data.frame(y.new)
+colnames(y.new) <- c("site", "freq")
+y.new[y.new == 0] <- NA
+y.new <- na.omit(y.new)
+y.new$site <- as.integer(y.new$site)
+y.new <- tbl_df(y.new)
+miss <- y.new %>% expand(site = 1:nsites)
+miss$freq <- rep(0, length(miss))
+y.y <- full_join(y.new, miss, by = "site")
+y.y <- y.y %>% arrange(site)
+y.y <- as.numeric(y.y$freq.x)
+y.y[is.na(y.y)] <- 0
+
+
+midpt <- seq(25, 650, 25)       # mid point of each distance category
+nG <- length(midpt)       			# number of distance categories
+v <- 25			    			          # width of distance categories
+B <- 650                       # upper bound (max. distance)
+
+
+################Single Species################
+nind <- sum(y.y)                           
+site <- Data_cap[,4]
+dclass <- Data_cap[,5]
+
+#Overlap
+overlap <- array(0, dim = c(Nwithin,J))
+
+for(i in 1:Nwithin){
+  for(j in 1:J){
+    if(ncap[i] == 1 && d[index[i],j] < 650)
+      overlap[i,j] <- d[index[i],j]
+  }
+}
+
+OVA <- which(!overlap == 0, arr.ind = TRUE)
+OVA <- OVA[order(OVA[,1]),]
+OVAsite <- NULL
+
+for(i in 1:length(OVA[,1])){
+  for(j in 1:nsites){
+    if(si[j] < OVA[i,2] && OVA[i,2] <= si[j+1])
+      OVAsite[i] <- j
+  }
+}
+
+OVA <- data.frame(OVA[,1], OVAsite)
+OVA <- unique(OVA)
+OVA <- subset(OVA, duplicated(OVA[,1]) | duplicated(OVA[,1], fromLast = TRUE))
+OVA <- group_by(OVA, OVAsite)%>%
+  summarize(n_distinct(OVA...1.))
+colnames(OVA) <- c("site", "overlaps")
+miss <- OVA %>% expand(site = 1:nsites)
+miss$"overlaps" <- rep(0, length(miss))
+OVA <- full_join(OVA, miss, by = "site")
+OVA <- OVA %>% arrange(site)
+OVA[is.na(OVA)] <- 0
+
+##########################################################################################################
+### sink JAGS model
+
+library(jagsUI)
+
+sink("ssds_mdpt.txt")
+cat("
+    model{ 
+    # Priors
+    
+    for(j in 1:nsites){
+    alpha[j] ~ dnorm(0, 0.01)
+    sigma[j] ~ dunif(0, 500)
+    }
+    
+    # Multinomial Component
+    for(i in 1:nind){
+    dclass[i] ~ dcat(fc[1:nG, site[i]]) # Part 1 of HM
+    }
+    
+    for(j in 1:nsites){
+    
+    # construct cell probabilities for nG cells
+    for(k in 1:nG){  
+    
+    # half normal detection function at midpt (length of rectangle)
+    p[k,j] <- exp(- midpt[k] * midpt[k] / (2 * sigma[j] * sigma[j])) 
+    
+    # probability of x in each interval (width of rectangle)
+    pi[k,j] <- v/B 
+    
+    # detection probability for each interval (area of each rectangle)
+    f[k,j] <- p[k,j] * pi[k,j] 
+    
+    # conditional detection probability (scale to 1)
+    fc[k,j] <- f[k,j] / pcap[j] 
+    }
+    
+    # detection probability at each site (sum of rectangles)
+    pcap[j] <- sum(f[1:nG,j])               
+    
+    
+    y[j] ~ dbin(pcap[j], N[j])   # Part 2 of HM
+    N[j] ~ dpois(lambda[j]) # Part 3 of HM
+    lambda[j] <- exp(alpha[j])    # linear model for abundance
+    
+    #Chi squared fit statistic
+    eval[j] <- pcap[j] * N[j]
+    E[j] <- pow((y[j] - eval[j]),2)/(eval[j] + 0.5)
+    y.new[j] ~ dbin(pcap[j], N[j])
+    E.new[j] <- pow((y.new[j] - eval[j]),2)/(eval[j] + 0.5)
+    }
+    
+    # Derived params
+    Ntotal <- sum(N[1:nsites])
+    D <- (Ntotal/164.4837)
+    Nreal <- D * 939.316
+    
+    #Chi squared fit statistic
+    fit <- sum(E[])
+    fit.new <- sum(E.new[])
+    }
+    
+    
+    ",fill=TRUE)
+sink()
+
+
+
+### compile data for JAGS model
+
+str(data <- list(nG = nG, v = v, site = site, y = y.y, B = B, midpt = midpt,
+                 nind = nind, dclass = dclass, nsites = nsites))
+
+### create initial values
+N.in <- y.y + 1
+
+inits1 <- function(){list(N = N.in, sigma = runif(17, 50, 350))} 
+
+
+### set parameters to monitor
+params1<-c('Ntotal', 'sigma', 'N', 'pcap')
+
+### mcmc settings
+
+nc <- 3
+ni <- 25000
+nb <- 5000
+nt <- 5
+
+### run model
+
+ssds <- jags(data = data, inits = inits1, parameters.to.save = params1, model.file = "ssds_mdpt.txt", 
+             n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = TRUE)
+
+#Visualize
+plot(EL, type = "l")
+plot(Site1, add=T, col="red")
+plot(Site2, add=T, col="darkorange")
+plot(Site3, add=T, col="gold")
+plot(Site4, add=T, col="darkolivegreen2")
+plot(Site5, add=T, col="forestgreen")
+plot(Site6, add=T, col="aquamarine")
+plot(Site7, add=T, col="cadetblue3")
+plot(Site8, add=T, col="cornflowerblue")
+plot(Site9, add=T, col="blue")
+plot(Site10, add=T, col="blueviolet")
+plot(Site11, add=T, col="darkmagenta")
+plot(Site12, add=T, col="deeppink4")
+plot(Site13, add=T, col="darkred")
+plot(Site14, add=T, col="black")
+plot(Site15, add=T, col="coral2")
+plot(Site16, add=T, col="brown")
+plot(Site17, add=T, col="grey")
+points(cbind(u1, u2), col = "black", lwd = 1)
+points(cbind(Data_650[,2], Data_650[,3]), col = "green")
+points(cbind(Data_cap[,2], Data_cap[,3]), col = "red")
+
+
+
+test <- table(Data_650[,4])
+
+preal <- y.y / test
+
+
+compare <- data.frame(test, y.y, ssds$mean$N, preal, ssds$mean$pcap, OVA$overlaps.x)
+compare
+
+### diagnostics
+traceplot(ssds, "N")
+traceplot(ssds, "sigma")
+pp.check(ssds, "fit", "fit.new")
