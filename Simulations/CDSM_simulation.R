@@ -128,24 +128,45 @@ sigma <- 300
 #-Initialize Values-#
 #-------------------#
 
+#Index for transect points
 J <- length(X)
-si <- seq(0, 255, 15) #site ID
-di <- seq(0,650,25) #distance ID
+
+#ID for sites
+si <- seq(0, 255, 15)
+
+#ID for distance class
+di <- seq(0,650,25)
+
+#Index for sites
 nsites <- 17
+
+#Index for distance class
 ndst <- length(di) - 1
+
+#Distance class
 dclass <- rep(NA, N)
+
+#Minimum distance value
 dst <- rep(NA, N)
+
+#ID for nearest site
 q <- rep(NA, N)
+
+#Site
 site <- rep(NA, N)
 
-#Distance Value Matrix N x J
+#Distance value to each transect point
 d <- array(NA, dim = c(N, J))
 
-#Presence Absence
+#ID for observations less than 650 meters
 y <- rep(NA, N)
 
-#Index
+#Index recorder
 index <- rep(NA, N)
+
+#---------------#
+#-Simulate Data-#
+#---------------#
 
 #Simulate distances, detection probability, and presence/absence
 for(i in 1:N){
