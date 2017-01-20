@@ -2,7 +2,7 @@
 #----Simulation for Community Distance Sampling Model.----#
 #----Data is simmulated for actual sampling design of-----#
 #----transects. Transects were imported as shapefiles.----#
-#----Script lasted edited by Matthew Farr (1/18/17)-------#
+#----Script lasted edited by Matthew Farr (1/20/17)-------#
 #---------------------------------------------------------#
 
 #-----------------------#
@@ -19,6 +19,7 @@ library(rgdal)
 library(sp)
 library(dplyr)
 library(tidyr)
+library(jagsUI)
 
 #----------------------------#
 #-Import Transect Shapefiles-#
@@ -121,8 +122,20 @@ gs <- rpois(N, lambda.group) + 1
 #Abundance
 Ntotal <- sum(gs)
 
-#Half Normal Detection Parameter
+#Half normal detection parameter
 sigma <- 300
+
+#Mid point of each distance class
+midpt <- seq(25, 650, 25)
+
+#Index for distance class
+nG <- length(midpt)
+
+#Width of distance class
+v <- 25
+
+#Transect half width
+B <- 650
 
 #-------------------#
 #-Initialize Values-#
@@ -140,9 +153,6 @@ di <- seq(0,650,25)
 #Index for sites
 nsites <- 17
 
-#Index for distance class
-ndst <- length(di) - 1
-
 #Distance class
 dclass <- rep(NA, N)
 
@@ -158,7 +168,7 @@ site <- rep(NA, N)
 #Distance value to each transect point
 d <- array(NA, dim = c(N, J))
 
-#ID for observations less than 650 meters
+#ID for groups less than 650 meters
 y <- rep(NA, N)
 
 #Index recorder
@@ -168,171 +178,285 @@ index <- rep(NA, N)
 #-Simulate Data-#
 #---------------#
 
-#Simulate distances, detection probability, and presence/absence
-for(i in 1:N){
+  for(i in 1:N){
   for(j in 1:J){
-    d[i,j] <- sqrt((u1[i] - X[j])^2 + (u2[i] - Y[j])^2)
+    
+  #Distance from each group to each point on the transect
+  d[i,j] <- sqrt((u1[i] - X[j])^2 + (u2[i] - Y[j])^2)
   }
+    
+  #Distance to nearest point on the transect
   dst[i] <- min(d[i,])
+  
+  #Index of which point in 1:J is the nearest
   q[i] <- which.min(d[i,])
+  
   for(j in 1:nsites){
-    if(si[j] < q[i] && q[i] <= si[j+1])
-      site[i] <- j
+  
+  #Determine the site for each group
+  if(si[j] < q[i] && q[i] <= si[j+1])
+  site[i] <- j
   }
+  
+  #Index of which observation are within 650 meters of transect
   if(dst[i] < 650)
   y[i] <- 1
   index[i] <- i
-}
+  }
 
-Data_Tot <- cbind(y, index, u1, u2, site, gs)
-Data_650 <- Data_Tot[complete.cases(Data_Tot),]
+#--------------#
+#-Harvest Data-#
+#--------------#
 
-Nwithin <- length(Data_650[,1])
+#Dataframe that includes information on all groups
+Dtot <- cbind(y, index, u1, u2, site, gs)
 
+#Dataframe containing only groups within 650 meters to transect
+Din <- Dtot[complete.cases(Dtot),]
+
+#Number of groups within 650 meters
+Nin <- length(Din[,1])
+
+#Abundance within 650 meters
+Nintotal <- sum(Din[,6])
+
+#-----------------#
+#-Initialize Data-#
+#-----------------#
+
+#Remove groups not within 650 meters
 index <- index[y==1]
 index <- index[!is.na(index)]
 
 #Detection Probability
 p <- NULL
 
-ncap <- rep(NA, Nwithin)
+#Number of captured ("detected") groups
+ncap <- rep(NA, Nin)
 
 #Distance Class
-dclass <- rep(NA, Nwithin)
+dclass <- rep(NA, Nin)
 
-for(i in 1:Nwithin){
+#---------------#
+#-Simulate Data-#
+#---------------#
+
+  for(i in 1:Nin){
+    
+  #Detection probability using half-normal distance function
   p[i] <- exp(-dst[index[i]] * dst[index[i]] / (2 * sigma * sigma))
+  
+  #Simulate number of groups detected
   ncap[i] <- rbinom(1, 1, p[i])
-  for(k in 1:ndst){
-    if(di[k] < dst[index[i]] && dst[index[i]] <= di[k+1])
-      dclass[i] <- k
+  
+  for(k in 1:nG){
+  
+  #Determine distance class for each group
+  if(di[k] < dst[index[i]] && dst[index[i]] <= di[k+1])
+  dclass[i] <- k
   }
+  }
+
+#--------------#
+#-Harvest Data-#
+#--------------#
+
+#Add distance class, detection probability, and detection index to dataframe
+Din <- cbind(Din[,2:6],dclass, p, ncap)
+
+#Undetected groups as NAs
+for(i in 1:Nin){
+  if(Din[i,8] == 0)
+    Din[i,8] <- NA
 }
 
-Data_650 <- cbind(Data_650[,2:6],dclass, p, ncap)
-for(i in 1:Nwithin){
-  if(Data_650[i,8] == 0)
-    Data_650[i,8] <- NA
-}
+#Dataframe of detected inidividuals
+Dcap <- Din[complete.cases(Din),]
 
-Data_cap <- Data_650[complete.cases(Data_650),]
-
-y.new <- table(Data_cap[,4])
+#Create observed number of groups per site
+y.new <- table(Dcap[,4])
 y.new <- as.data.frame(y.new)
 colnames(y.new) <- c("site", "freq")
-y.new[y.new == 0] <- NA
-y.new <- na.omit(y.new)
 y.new$site <- as.integer(y.new$site)
 y.new <- tbl_df(y.new)
+
+#Add in sites with no detections
 miss <- y.new %>% expand(site = 1:nsites)
 miss$freq <- rep(0, length(miss))
-y.y <- full_join(y.new, miss, by = "site")
-y.y <- y.y %>% arrange(site)
-y.y <- as.numeric(y.y$freq.x)
-y.y[is.na(y.y)] <- 0
 
+#Add missing sites into observed groups per site
+yobs <- full_join(y.new, miss, by = "site")
+yobs <- yobs %>% arrange(site)
+yobs <- as.numeric(yobs$freq.x)
+yobs[is.na(yobs)] <- 0
 
-midpt <- seq(25, 650, 25)       # mid point of each distance category
-nG <- length(midpt)       			# number of distance categories
-v <- 25			    			          # width of distance categories
-B <- 650                       # upper bound (max. distance)
+#Site index for observed number of groups
+site <- Dcap[,4]
 
+#Distance class index for observed number of groups
+dclass <- Dcap[,6]
 
-################Single Species################
-nind <- sum(y.y)                           
-site <- Data_cap[,4]
-dclass <- Data_cap[,6]
+#Number of observations
+nobs <- sum(yobs)
 
-#Overlap
-overlap <- array(0, dim = c(Nwithin,J))
+#Group size
+gs <- Dcap[,5]
 
-for(i in 1:Nwithin){
+#-----------------------#
+#-Generate Overlap Data-#
+#-----------------------#
+
+#Initialize overlap array
+overlap <- array(0, dim = c(Nin,J))
+
+  for(i in 1:Nin){
   for(j in 1:J){
-    if(ncap[i] == 1 && d[index[i],j] < 650)
+  
+  #Harvest potential overlap data for groups within 650 meters
+  if(ncap[i] == 1 && d[index[i],j] < 650)
       overlap[i,j] <- d[index[i],j]
   }
-}
+  }
 
+#Matirx of group ID (col 1) and transect point ID (col 2) within 650 meters
 OVA <- which(!overlap == 0, arr.ind = TRUE)
 OVA <- OVA[order(OVA[,1]),]
+
+#Initialize number of overlaps per site
 OVAsite <- NULL
 
-for(i in 1:length(OVA[,1])){
+  for(i in 1:length(OVA[,1])){
   for(j in 1:nsites){
-    if(si[j] < OVA[i,2] && OVA[i,2] <= si[j+1])
-      OVAsite[i] <- j
+    
+  #Corresponding site ID for each group ID
+  if(si[j] < OVA[i,2] && OVA[i,2] <= si[j+1])
+  OVAsite[i] <- j
   }
-}
+  }
 
+#Combine site ID with dataframe
 OVA <- data.frame(OVA[,1], OVAsite)
+
+#Deletes duplicate values
 OVA <- unique(OVA)
+
+#Removes groups not seen in 2 sites
 OVA <- subset(OVA, duplicated(OVA[,1]) | duplicated(OVA[,1], fromLast = TRUE))
+
+#Determines number of overlap per site
 OVA <- group_by(OVA, OVAsite)%>%
   summarize(n_distinct(OVA...1.))
 colnames(OVA) <- c("site", "overlaps")
+
+#Adds sites with no overlap
 miss <- OVA %>% expand(site = 1:nsites)
 miss$"overlaps" <- rep(0, length(miss))
 OVA <- full_join(OVA, miss, by = "site")
 OVA <- OVA %>% arrange(site)
 OVA[is.na(OVA)] <- 0
 
-##########################################################################################################
-### sink JAGS model
+#------------#
+#-BUGS Model-#
+#------------#
 
-library(jagsUI)
-
-sink("ssds_mdpt.txt")
+sink("ssds.txt")
 cat("
     model{ 
-    # Priors
+    
+    ##Priors
     
     for(j in 1:nsites){
+
+    #Abundance prior
     alpha[j] ~ dnorm(0, 0.01)
+
+    #Detection prior
     sigma[j] ~ dunif(0, 500)
-    }
+
+    }#End j loop
+
+    #Group size prior
+    beta ~ dunif(0, 50)
+
+    ##Likelihood
     
-    # Multinomial Component
-    for(i in 1:nind){
-    dclass[i] ~ dcat(fc[1:nG, site[i]]) # Part 1 of HM
-    }
+    #Multinomial detection component
+    for(i in 1:nobs){
+
+    dclass[i] ~ dcat(fc[1:nG, site[i]])
+
+    }#End i loop
     
     for(j in 1:nsites){
     
-    # construct cell probabilities for nG cells
+    #Construct cell probabilities for nG cells
     for(k in 1:nG){  
     
-    # half normal detection function at midpt (length of rectangle)
+    #Half normal detection function at midpt (length of rectangle)
     p[k,j] <- exp(- midpt[k] * midpt[k] / (2 * sigma[j] * sigma[j])) 
     
-    # probability of x in each interval (width of rectangle)
+    #Probability of x in each interval (width of rectangle)
     pi[k,j] <- v/B 
     
-    # detection probability for each interval (area of each rectangle)
+    #Detection probability for each interval (area of each rectangle)
     f[k,j] <- p[k,j] * pi[k,j] 
     
-    # conditional detection probability (scale to 1)
+    #Conditional detection probability (scale to 1)
     fc[k,j] <- f[k,j] / pcap[j] 
-    }
+
+    }#End k loop
     
-    # detection probability at each site (sum of rectangles)
+    #Detection probability at each site (sum of rectangles)
     pcap[j] <- sum(f[1:nG,j])               
     
-    
-    y[j] ~ dbin(pcap[j], N[j])   # Part 2 of HM
-    N[j] ~ dpois(lambda[j]) # Part 3 of HM
-    lambda[j] <- exp(alpha[j])    # linear model for abundance
+    #Observation process
+    y[j] ~ dbin(pcap[j], N[j])
+
+    #Description of latent number of groups
+    N[j] ~ dpois(lambda[j])
+
+    #Linear model for number of groups
+    lambda[j] <- exp(alpha[j])
     
     #Chi squared fit statistic
     eval[j] <- pcap[j] * N[j]
     E[j] <- pow((y[j] - eval[j]),2)/(eval[j] + 0.5)
     y.new[j] ~ dbin(pcap[j], N[j])
     E.new[j] <- pow((y.new[j] - eval[j]),2)/(eval[j] + 0.5)
-    }
+
+    #Group size
+    gs.lam[j] <- exp(beta)
     
-    # Derived params
-    Ntotal <- sum(N[1:nsites])
-    D <- (Ntotal/164.4837)
-    Nreal <- D * 939.316
+    }#End j loop
+
+    for(i in 1:nobs){
+
+    gs[i] ~ dpois(gs.lam[site[i]])
+
+    }#End i loop
+    
+    ##Derived quantities
+
+    #Number of groups within
+    Nin <- sum(N[1:nsites])
+
+    for(j in 1:nsites){
+
+    #Abundance within
+    Ntotal[j] <- N[j] * gs.lam[j]
+
+    } #End j loop
+
+    Nintotal <- sum(Ntotal[])
+
+    #Density
+    D <- (939.316/164.4837)
+    
+    #Number of total groups in sampling boundary
+    Nreal <- Nin * D
+
+    #Abundance in sampling boundary
+    Nrealtotal <- Nintotal * D
     
     #Chi squared fit statistic
     fit <- sum(E[])
@@ -344,31 +468,35 @@ cat("
 sink()
 
 
+#-------------------#
+#-Compile BUGS data-#
+#-------------------#
 
-### compile data for JAGS model
+#Imput data
+str(data <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
+                 nobs = nobs, dclass = dclass, nsites = nsites, gs = gs))
 
-str(data <- list(nG = nG, v = v, site = site, y = y.y, B = B, midpt = midpt,
-                 nind = nind, dclass = dclass, nsites = nsites))
+#Initial values
+N.in <- yobs + 1
 
-### create initial values
-N.in <- y.y + 1
-
-inits1 <- function(){list(N = N.in, sigma = runif(17, 50, 350))} 
+inits <- function(){list(N = N.in, sigma = runif(17, 50, 350))} 
 
 
-### set parameters to monitor
-params1<-c('Ntotal', 'sigma', 'N', 'pcap', 'fit', 'fit.new')
+#Parameters to monitor
+params<-c('sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal', 'fit', 'fit.new')
 
-### mcmc settings
+#MCMC settings
 
 nc <- 3
 ni <- 25000
 nb <- 5000
 nt <- 5
 
-### run model
+#----------------#
+#-Run BUGS Model-#
+#----------------#
 
-ssds <- jags(data = data, inits = inits1, parameters.to.save = params1, model.file = "ssds_mdpt.txt", 
+ssds <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "ssds.txt", 
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = TRUE)
 
 #Visualize
@@ -391,12 +519,12 @@ plot(Site15, add=T, col="coral2")
 plot(Site16, add=T, col="brown")
 plot(Site17, add=T, col="grey")
 points(cbind(u1, u2), col = "black", lwd = 1)
-points(cbind(Data_650[,2], Data_650[,3]), col = "green")
-points(cbind(Data_cap[,2], Data_cap[,3]), col = "red")
+points(cbind(Din[,2], Din[,3]), col = "green")
+points(cbind(Dcap[,2], Dcap[,3]), col = "red")
 
 
 
-test <- table(Data_650[,4])
+test <- table(Din[,4])
 
 preal <- y.y / test
 
