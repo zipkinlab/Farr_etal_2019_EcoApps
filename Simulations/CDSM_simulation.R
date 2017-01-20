@@ -184,7 +184,7 @@ for(i in 1:N){
   index[i] <- i
 }
 
-Data_Tot <- cbind(y, index, u1, u2, site)
+Data_Tot <- cbind(y, index, u1, u2, site, gs)
 Data_650 <- Data_Tot[complete.cases(Data_Tot),]
 
 Nwithin <- length(Data_650[,1])
@@ -209,17 +209,13 @@ for(i in 1:Nwithin){
   }
 }
 
-Data_650 <- cbind(Data_650[,2:5],dclass, p, ncap)
+Data_650 <- cbind(Data_650[,2:6],dclass, p, ncap)
 for(i in 1:Nwithin){
-  if(Data_650[i,7] == 0)
-    Data_650[i,7] <- NA
+  if(Data_650[i,8] == 0)
+    Data_650[i,8] <- NA
 }
 
 Data_cap <- Data_650[complete.cases(Data_650),]
-
-
-
-
 
 y.new <- table(Data_cap[,4])
 y.new <- as.data.frame(y.new)
@@ -245,7 +241,7 @@ B <- 650                       # upper bound (max. distance)
 ################Single Species################
 nind <- sum(y.y)                           
 site <- Data_cap[,4]
-dclass <- Data_cap[,5]
+dclass <- Data_cap[,6]
 
 #Overlap
 overlap <- array(0, dim = c(Nwithin,J))
@@ -361,7 +357,7 @@ inits1 <- function(){list(N = N.in, sigma = runif(17, 50, 350))}
 
 
 ### set parameters to monitor
-params1<-c('Ntotal', 'sigma', 'N', 'pcap')
+params1<-c('Ntotal', 'sigma', 'N', 'pcap', 'fit', 'fit.new')
 
 ### mcmc settings
 
@@ -412,3 +408,4 @@ compare
 traceplot(ssds, "N")
 traceplot(ssds, "sigma")
 pp.check(ssds, "fit", "fit.new")
+
