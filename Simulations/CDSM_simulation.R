@@ -385,6 +385,11 @@ cat("
 
     dclass[i] ~ dcat(fc[1:nG, site[i]])
 
+    #Fit statistic for detection
+    dclassnew[i] ~ dcat(fc[1:nG, site[i]])
+    Tobs[i] <- pow(1 - sqrt(fc[dclass[i], site[i]]), 2)
+    Tobsnew[i] <- pow(1 - sqrt(fc[dclassnew[i], site[i]]), 2)
+
     }#End i loop
     
     for(j in 1:nsites){
@@ -417,6 +422,11 @@ cat("
 
     #Linear model for number of groups
     lambda[j] <- exp(alpha[j])
+
+    #Fit statistic for number of groups
+    Nnew[j] ~ dpois(lambda[j])
+    Tn[j] <- pow(sqrt(N[j]) - sqrt(lambda[j]), 2)
+    Tnnew[j] <- pow(sqrt(Nnew[j]) - sqrt(lambda[j]), 2)
     
     #Chi squared fit statistic
     eval[j] <- pcap[j] * N[j]
@@ -431,7 +441,13 @@ cat("
 
     for(i in 1:nobs){
 
-    gs[i] ~ dpois(gs.lam[site[i]])
+    gs[i] ~ dpois(gs.lam[site[i]]) T(1,)
+
+    #Group fit statistic
+    gsnew[i] ~ dpois(gs.lam[site[i]]) T(1,)
+
+    Tg[i] <- pow(sqrt(gs[i]) - sqrt(gs.lam[site[i]]), 2)
+    Tgnew[i] <- pow(sqrt(gsnew[i]) - sqrt(gs.lam[site[i]]), 2)
 
     }#End i loop
     
@@ -458,7 +474,21 @@ cat("
     #Abundance in sampling boundary
     Nrealtotal <- Nintotal * D
     
-    #Chi squared fit statistic
+    ##Fit statistics
+
+    #Detection
+
+    fit.obs <- sum(Tobs[])
+    fit.obs.new <- sum(Tobsnew[])
+
+    #Abundance
+
+
+    #Group size
+    fit.gs. <- sum(Tg[])
+    fit.gs.new <- sum(Tgnew[])
+    
+
     fit <- sum(E[])
     fit.new <- sum(E.new[])
     }
