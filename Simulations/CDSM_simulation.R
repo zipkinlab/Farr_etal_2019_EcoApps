@@ -537,7 +537,7 @@ nt <- 5
 #-Run BUGS Model-#
 #----------------#
 
-ssds2 <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "ssds.txt", 
+ssds <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "ssds.txt", 
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = TRUE)
 
 #Visualize
