@@ -2,7 +2,7 @@
 #----Simulation for Community Distance Sampling Model.----#
 #----Data is simmulated for actual sampling design of-----#
 #----transects. Transects were imported as shapefiles.----#
-#----Script lasted edited by Matthew Farr (1/20/17)-------#
+#----Script lasted edited by Matthew Farr (1/23/17)-------#
 #---------------------------------------------------------#
 
 #-----------------------#
@@ -373,13 +373,11 @@ cat("
     #Detection prior
     sigma[j] ~ dunif(0, 500)
 
-    }#End j loop
-
     #Group size prior
     beta ~ dunif(0, 50)
 
     ##Likelihood
-    
+
     #Multinomial detection component
     for(i in 1:nobs){
 
@@ -482,10 +480,11 @@ cat("
     fit.obs.new <- sum(Tobsnew[])
 
     #Abundance
-
+    fit.ab <- sum(Tn[])
+    fit.ab.new <- sum(Tnnew[])
 
     #Group size
-    fit.gs. <- sum(Tg[])
+    fit.gs <- sum(Tg[])
     fit.gs.new <- sum(Tgnew[])
     
 
@@ -511,9 +510,10 @@ N.in <- yobs + 1
 
 inits <- function(){list(N = N.in, sigma = runif(17, 50, 350))} 
 
-
 #Parameters to monitor
-params<-c('sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal', 'fit', 'fit.new')
+params<-c('sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal', 
+          'fit', 'fit.new', 'fit.obs', 'fit.obs.new', 'fit.ab', 
+          'fit.ab.new', 'fit.gs', 'fit.gs.new')
 
 #MCMC settings
 
