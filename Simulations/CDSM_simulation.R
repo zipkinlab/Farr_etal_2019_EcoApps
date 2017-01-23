@@ -355,6 +355,15 @@ OVA <- full_join(OVA, miss, by = "site")
 OVA <- OVA %>% arrange(site)
 OVA[is.na(OVA)] <- 0
 
+#---------------#
+#-Model Offsets-#
+#---------------#
+
+#Search area of each site
+A.site <- as.vector(c(11.6542, 11.9619, 12.4702, 12.5182, 10.7843, 10.2384, 10.7495, 
+                    12.0545, 9.0114, 11.2589, 10.4075, 9.7834, 11.8226, 10.5295,
+                    11.5376, 14.8511, 14.0352))
+
 #------------#
 #-BUGS Model-#
 #------------#
@@ -372,6 +381,8 @@ cat("
 
     #Detection prior
     sigma[j] ~ dunif(0, 500)
+
+    }#End j loop
 
     #Group size prior
     beta ~ dunif(0, 50)
@@ -419,7 +430,7 @@ cat("
     N[j] ~ dpois(lambda[j])
 
     #Linear model for number of groups
-    lambda[j] <- exp(alpha[j])
+    lambda[j] <- exp(alpha[j] + log(offset[j]))
 
     #Fit statistic for number of groups
     Nnew[j] ~ dpois(lambda[j])
@@ -503,7 +514,7 @@ sink()
 
 #Imput data
 str(data <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
-                 nobs = nobs, dclass = dclass, nsites = nsites, gs = gs))
+                 nobs = nobs, dclass = dclass, nsites = nsites, gs = gs, offset = A.site))
 
 #Initial values
 N.in <- yobs + 1
@@ -511,7 +522,7 @@ N.in <- yobs + 1
 inits <- function(){list(N = N.in, sigma = runif(17, 50, 350))} 
 
 #Parameters to monitor
-params<-c('sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal', 
+params<-c('gs.lam', 'sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal', 
           'fit', 'fit.new', 'fit.obs', 'fit.obs.new', 'fit.ab', 
           'fit.ab.new', 'fit.gs', 'fit.gs.new')
 
@@ -526,7 +537,7 @@ nt <- 5
 #-Run BUGS Model-#
 #----------------#
 
-ssds <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "ssds.txt", 
+ssds2 <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "ssds.txt", 
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = TRUE)
 
 #Visualize
