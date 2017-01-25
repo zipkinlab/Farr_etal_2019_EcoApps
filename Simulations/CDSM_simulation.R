@@ -2,7 +2,7 @@
 #----Simulation for Community Distance Sampling Model.----#
 #----Data is simmulated for actual sampling design of-----#
 #----transects. Transects were imported as shapefiles.----#
-#----Script lasted edited by Matthew Farr (1/23/17)-------#
+#----Script lasted edited by Matthew Farr (1/25/17)-------#
 #---------------------------------------------------------#
 
 #-----------------------#
@@ -58,23 +58,23 @@ Site17 <- readOGR(dsn = d.dir, layer = "Site17")
 #-----------------------------------#
 
 regpoints <- spsample(EL, 200, type = "regular")
-s1p <- spsample(Site1, 15, type = "regular")
-s2p <- spsample(Site2, 15, type = "regular")
-s3p <- spsample(Site3, 15, type = "regular")
-s4p <- spsample(Site4, 15, type = "regular")
-s5p <- spsample(Site5, 15, type = "regular")
-s6p <- spsample(Site6, 15, type = "regular")
-s7p <- spsample(Site7, 15, type = "regular")
-s8p <- spsample(Site8, 15, type = "regular")
-s9p <- spsample(Site9, 15, type = "regular")
-s10p <- spsample(Site10, 15, type = "regular")
-s11p <- spsample(Site11, 15, type = "regular")
-s12p <- spsample(Site12, 15, type = "regular")
-s13p <- spsample(Site13, 15, type = "regular")
-s14p <- spsample(Site14, 15, type = "regular")
-s15p <- spsample(Site15, 15, type = "regular")
-s16p <- spsample(Site16, 15, type = "regular")
-s17p <- spsample(Site17, 15, type = "regular")
+s1p <- spsample(Site1, 30, type = "regular")
+s2p <- spsample(Site2, 30, type = "regular")
+s3p <- spsample(Site3, 30, type = "regular")
+s4p <- spsample(Site4, 30, type = "regular")
+s5p <- spsample(Site5, 30, type = "regular")
+s6p <- spsample(Site6, 30, type = "regular")
+s7p <- spsample(Site7, 30, type = "regular")
+s8p <- spsample(Site8, 30, type = "regular")
+s9p <- spsample(Site9, 30, type = "regular")
+s10p <- spsample(Site10, 30, type = "regular")
+s11p <- spsample(Site11, 30, type = "regular")
+s12p <- spsample(Site12, 30, type = "regular")
+s13p <- spsample(Site13, 30, type = "regular")
+s14p <- spsample(Site14, 30, type = "regular")
+s15p <- spsample(Site15, 30, type = "regular")
+s16p <- spsample(Site16, 30, type = "regular")
+s17p <- spsample(Site17, 30, type = "regular")
 
 #--------------------------#
 #-Combine Site Coordinates-#
@@ -94,9 +94,9 @@ Y <- c(s1p@coords[,2], s2p@coords[,2], s3p@coords[,2], s4p@coords[,2],
        s13p@coords[,2], s14p@coords[,2], s15p@coords[,2], s16p@coords[,2],
        s17p@coords[,2])
 
-#--------------------------#
-#-Create Sampling Boundary-#
-#--------------------------#
+#------------------------#
+#-Create Survey Boundary-#
+#------------------------#
 
 #Easting
 xlim <- c(715304, 752393)
@@ -141,17 +141,17 @@ B <- 650
 #-Initialize Values-#
 #-------------------#
 
+#Index for sites
+nsites <- 17
+
 #Index for transect points
 J <- length(X)
 
 #ID for sites
-si <- seq(0, 255, 15)
+si <- seq(0, J, (J/nsites))
 
 #ID for distance class
 di <- seq(0,650,25)
-
-#Index for sites
-nsites <- 17
 
 #Distance class
 dclass <- rep(NA, N)
@@ -512,7 +512,7 @@ sink()
 #-Compile BUGS data-#
 #-------------------#
 
-#Imput data
+#Input data
 str(data <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
                  nobs = nobs, dclass = dclass, nsites = nsites, gs = gs, offset = A.site))
 
@@ -529,9 +529,9 @@ params<-c('gs.lam', 'sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal',
 #MCMC settings
 
 nc <- 3
-ni <- 25000
-nb <- 5000
-nt <- 5
+ni <- 12000
+nb <- 2000
+nt <- 1
 
 #----------------#
 #-Run BUGS Model-#
@@ -541,7 +541,8 @@ ssds <- jags(data = data, inits = inits, parameters.to.save = params, model.file
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = TRUE)
 
 #Visualize
-plot(EL, type = "l")
+plot(x=NULL, y=NULL, xlim=xlim, ylim=ylim, 
+     yaxt = "n", xaxt = "n", ylab = "", xlab = "")
 plot(Site1, add=T, col="red")
 plot(Site2, add=T, col="darkorange")
 plot(Site3, add=T, col="gold")
@@ -561,7 +562,7 @@ plot(Site16, add=T, col="brown")
 plot(Site17, add=T, col="grey")
 points(cbind(u1, u2), col = "black", lwd = 1)
 points(cbind(Din[,2], Din[,3]), col = "green")
-points(cbind(Dcap[,2], Dcap[,3]), col = "red")
+points(cbind(Dcap[,2], Dcap[,3]), col = "red", pch = 20)
 
 
 

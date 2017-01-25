@@ -6,7 +6,7 @@ Et <- mdE - (13000/2)
 Nt <- mdN + (12650/2)
 
 Ep <- seq((Et + 650), (Et + (13000 - 650)), 1300)
-Np <- seq(Nt, (Nt - 12650), -506)
+Np <- seq(Nt, (Nt - 12650), -253)
 
 X <- rep(Ep, rep(length(Np), length(Ep)))
 Y <- rep(Np, length(Ep))
@@ -58,17 +58,17 @@ B <- 650
 #-Initialize Values-#
 #-------------------#
 
+#Index for sites
+nsites <- 10
+
 #Index for transect points
 J <- length(X)
 
 #ID for sites
-si <- seq(0, 260, 26)
+si <- seq(0, J, (J/nsites))
 
 #ID for distance class
 di <- seq(0,650,25)
-
-#Index for sites
-nsites <- 10
 
 #Distance class
 dclass <- rep(NA, N)
@@ -428,7 +428,7 @@ sink()
 #-Compile BUGS data-#
 #-------------------#
 
-#Imput data
+#Input data
 str(data <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
                  nobs = nobs, dclass = dclass, nsites = nsites, gs = gs))
 
