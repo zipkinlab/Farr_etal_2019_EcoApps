@@ -141,8 +141,8 @@ modFile <- "C:/Users/farrm/Documents/GitHub/CDSM/Simulations/CDSM_model.txt"
 #------------------#
 
 #Number of iterations
-niter <- 10	
-subniter <- 20
+niter <- 2	
+subniter <- 2
 
 #Starting iteration
 iter <- 1
@@ -154,7 +154,7 @@ bias <- array(NA, dim = c(5, 6, subniter, niter),
                               NULL, NULL))
 overlapcor <- array(NA, dim = c(niter, subniter))
 
-while(iter <= niter){
+system.time(while(iter <= niter){
   
   print (c(iter, "iter"))
   
@@ -720,6 +720,7 @@ while(iter <= niter){
   iter <- iter + 1
   
 } #End main loop
+)
 
 summary.bias <- array(NA, dim = c(10, 2))
 for(i in 1:10){
