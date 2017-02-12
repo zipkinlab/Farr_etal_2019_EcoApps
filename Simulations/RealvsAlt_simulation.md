@@ -6,7 +6,7 @@ I thought I would address the sampling design in the methods, but I plan on putt
 
 The purpose of the simulation study is to compare standard distance sampling survey design to our study’s twisty distance sampling survey design. Our study implemented twisty distance sampling survey design due to sampling constraints. This sampling design may create biases by overinflating the estimation of detection. Hiby and Krishna (2001) showed that twisty sampling design had a minimum impact on estimating detection, and we will confirm this notion by comparing the relative bias of twisty sampling to standard sampling. 
 
-I have a simulation with multiple iterations up and running. I plan to have multiple iterations with sub-iterations for resampling. For each iteration, observations (groups not individuals) are distributed uniformly across the sampling area. For each sub-iteration, the iteration of uniformly distributed observations is resampled. Below is the annotated code for the simulation study. This Rmarkdown file only shows a single iteration / sub-iteration of the simulation. 
+I have a simulation with multiple iterations up and running. I plan to have multiple iterations with sub-iterations for resampling. For each iteration, observations (groups not individuals) are distributed uniformly across the sampling area. For each sub-iteration, the iteration of uniformly distributed observations is resampled. At the bottom of this file is a table of information I plan on summarizing across iter and sub-iter. Below is the annotated code for the simulation study. This Rmarkdown file only shows a single iteration / sub-iteration of the simulation. 
 
 Rmarkdown file last edited by Matthew Farr (2/12/17).
 
@@ -1094,6 +1094,8 @@ Groups within are the number of groups within 650 meters (green circles in figur
 ## Abundance            2963 2745.0082 7.3571329     2963 2553.5607 13.818403
 ## Sigma                 300  298.6524 0.4491995      300  332.3682 10.789402
 ```
+The above table is for a single iteration and sub-iteration. This is the information I plan on keeping for each simulation, and then I will summarize across iterations and sub-iterations. 
+
 
 Overlap correlation with detection (sigma)
 
