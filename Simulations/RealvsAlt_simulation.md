@@ -103,7 +103,7 @@ Site16 <- readOGR(dsn = d.dir, layer = "Site16")
 Site17 <- readOGR(dsn = d.dir, layer = "Site17")
 ```
 
-![](RealvsAlt_simulation_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](https://github.com/farrmt/CDSM/blob/master/Simulations/Image1.png)<!-- -->
 
 Sample coordintaes from transect. Used to calculate distances of observed groups.
 
@@ -145,7 +145,7 @@ Y <- c(s1p@coords[,2], s2p@coords[,2], s3p@coords[,2], s4p@coords[,2],
        s17p@coords[,2])
 ```
 
-![](RealvsAlt_simulation_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](https://github.com/farrmt/CDSM/blob/master/Simulations/Image2.png)<!-- -->
 
 Initialize values
 
@@ -577,7 +577,7 @@ X <- rep(Ep, rep(length(Np), length(Ep)))
 Y <- rep(Np, length(Ep))
 ```
 
-![](RealvsAlt_simulation_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](https://github.com/farrmt/CDSM/blob/master/Simulations/Image3.png)<!-- -->
 
 inititalize values
 
@@ -1003,7 +1003,7 @@ Real sampling output
 ## DIC is an estimate of expected predictive error (lower is better).
 ```
 
-![](RealvsAlt_simulation_files/figure-html/unnamed-chunk-35-1.png)<!-- -->
+![](https://github.com/farrmt/CDSM/blob/master/Simulations/Image4.png)<!-- -->
 
 Alternative sampling output
 
@@ -1073,7 +1073,7 @@ points(altVals[[1]], col = "green")
 points(altVals[[2]], col = "red", pch = 20)
 ```
 
-![](RealvsAlt_simulation_files/figure-html/unnamed-chunk-36-1.png)<!-- -->
+![](https://github.com/farrmt/CDSM/blob/master/Simulations/Image5.png)<!-- -->
 
 Bias output
 
