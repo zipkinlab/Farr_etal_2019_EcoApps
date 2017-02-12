@@ -48,7 +48,7 @@ N <- 1000
 sigma <- 300
 
 #Mid point of each distance class
-midpt <- seq(25, 650, 25)
+midpt <- seq(12.5, 650, 25)
 
 #Index for distance class
 nG <- length(midpt)
@@ -141,8 +141,8 @@ modFile <- "C:/Users/farrm/Documents/GitHub/CDSM/Simulations/CDSM_model.txt"
 #------------------#
 
 #Number of iterations
-niter <- 2	
-subniter <- 2
+niter <- 120	
+subniter <- 25
 
 #Starting iteration
 iter <- 1
@@ -424,8 +424,8 @@ system.time(while(iter <= niter){
     #-------------------#
     
     #Input data
-    str(realD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
-                      nobs = nobs, dclass = dclass, nsites = nsites, gs = gs, offset = A.site))
+    realD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
+                      nobs = nobs, dclass = dclass, nsites = nsites, gs = gs, offset = A.site)
     
     #Initial values
     N.in <- yobs + 1
@@ -447,7 +447,7 @@ system.time(while(iter <= niter){
     #----------------#
     
     realM <- jags(data = realD, inits = inits, parameters.to.save = params, model.file = modFile, 
-                  n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = TRUE)
+                  n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, parallel = TRUE)
     
     #----------------------------------------#
     #-Save and Remove Data for Next Sampling-#
@@ -634,8 +634,8 @@ system.time(while(iter <= niter){
     #-------------------#
     
     #Input data
-    str(altD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
-                     nobs = nobs, dclass = dclass, nsites = nsites, gs = gs, offset = rep(1, nsites)))
+    altD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
+                     nobs = nobs, dclass = dclass, nsites = nsites, gs = gs, offset = rep(1, nsites))
     
     #Initial values
     N.in <- yobs + 1
@@ -647,7 +647,7 @@ system.time(while(iter <= niter){
     #----------------#
     
     altM <- jags(data = altD, inits = inits, parameters.to.save = params, model.file = modFile, 
-                 n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = TRUE)
+                 n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, parallel = TRUE)
     
     #----------------------------------------#
     #-Save and Remove Data for Next Sampling-#
@@ -722,8 +722,8 @@ system.time(while(iter <= niter){
 } #End main loop
 )
 
-summary.bias <- array(NA, dim = c(10, 2))
-for(i in 1:10){
+summary.bias <- array(NA, dim = c(niter, 2))
+for(i in 1:niter){
   for(j in 1:2){
   summary.bias[i,1] <- mean(bias[5,3,,i])
   summary.bias[i,2] <- mean(bias[5,6,,i])
