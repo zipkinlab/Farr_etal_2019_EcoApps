@@ -64,7 +64,7 @@ for(s in 1:11){
 #-------------------------#
 
 #Distance class were created in ArcGIS using minimum distance
-Dst <- raw$DSclass
+dclass <- raw$DSclass
 
 #Width of distance classes
 v <- 50 #meters
@@ -108,7 +108,7 @@ nD <- length(mdpt)
 #-Import group size of observations-#
 #-----------------------------------#
 
-gs <- raw$count
+gs <- raw$Count
 
 #----------------------------#
 #-Sampling area of each site-#
@@ -128,9 +128,9 @@ region <- c(rep(0, 13), rep(1, 4))
 #-Combine data-#
 #--------------#
 
-DSdata <- list(y, Dst, v, B, site, rep, spec, mdpt, nsites, nreps, nspec, nobs, 
+DSdata <- list(y, dclass, v, B, site, rep, spec, mdpt, nsites, nreps, nspec, nobs, 
                nD, gs, area, region)
-heads <- c("y", "Dst", "v", "B", "site", "rep", "spec", "mdpt", "nsites", "nreps", 
+heads <- c("y", "dclass", "v", "B", "site", "rep", "spec", "mdpt", "nsites", "nreps", 
                           "nspec", "nobs", "nD", "gs", "area", "region")
 DSdata <- setNames(DSdata, nm = heads)
 
