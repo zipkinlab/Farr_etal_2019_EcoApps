@@ -7,7 +7,7 @@
 #-Set Working Directory-#
 #-----------------------#
 
-setwd("C:/Users/farrm/Documents/GitHub/CDSM/Simulations")
+setwd("C:/Users/farrm/Documents/GitHub/CDSM/DataAnalysis")
 
 #---------------#
 #-Load Libaries-#
@@ -162,7 +162,7 @@ cat("
     
     ## Derived quantities
     
-    for(s in 1:nspec){
+    for(s in denspec){
     
     for(j in 1:nsites){
     
@@ -179,7 +179,10 @@ cat("
     
     GS[s] <- sum(GSsite[1:nsites, s])
     
-    DenGS[s] <- mean(DenGSsite[1:nsites, s])
+    DenGS[s] <- mean(DenGSsite[1:nsites, s]) * 100 #per 100 km2
+
+    RegDen[s,1] <- mean(DenGSsite[1:13, s]) * 100 #per 100 km2
+    RegDen[s,2] <- mean(DenGSsite[14:17, s]) * 100 #per 100 km2
     
     }#end s loop
     
@@ -193,7 +196,7 @@ sink()
 
 data <- list(nspec = nspec, nD = nD, v = v, area = area, site = site, rep = rep, spec = spec, 
              y = y, B = B, mdpt = mdpt, nobs = nobs, dclass = dclass, nsites = nsites, 
-             nreps = nreps, gs = gs, region = region)
+             nreps = nreps, gs = gs, region = region, denspec = denspec)
 
 #---------------#
 #-Inital values-#
@@ -204,23 +207,23 @@ Nst <- y + 1
 inits <- function(){list(N = Nst, mu_a0 = runif(1, 0, 1), tau_a0 = runif(1, 0, 1),
                           mu_s = runif(1, 5, 6), sig_s=runif(1),asig = runif(nspec, 5, 6), 
                           mu_a1 = runif(1, 0, 1), tau_a1 = runif(1, 0, 1))}
-#mu_b1 = runif(1, 0, 1), tau_b1 = runif(1, 0, 1))} 
 
 #--------------------#
 #-Parameters to save-#
 #--------------------#
 
-params<-c('mu_a0', 'mu_a1', 'mu_s', 'tau_a0', 'tau_a1', 'tau_s', 'alpha0', 'alpha1', 'beta0', 'beta1', 'GS', 'DenGS')
+params<-c('mu_a0', 'mu_a1', 'mu_s', 'tau_a0', 'tau_a1', 'tau_s', 
+          'alpha0', 'alpha1', 'beta0', 'beta1', 'GS', 'DenGS', 'RegDen')
 
 #---------------#
 #-MCMC settings-#
 #---------------#
 
 nc <- 3
-ni <- 150000
+ni <- 250000
 nb <- 50000
 nt <- 20
 
 CDSM <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "CDSM.txt", 
                          n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = FALSE, parallel = TRUE)
-A
+
