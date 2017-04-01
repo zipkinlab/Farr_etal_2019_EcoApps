@@ -1,6 +1,6 @@
 #---------------------------------------------------------#
 #----Community distance sampling model -------------------#
-#----Script lasted edited by Matthew Farr (3/03/17)-------#
+#----Script lasted edited by Matthew Farr (3/28/17)-------#
 #---------------------------------------------------------#
 
 #-----------------------#
@@ -34,27 +34,8 @@ attach(DSdata)
 sink("CDSM.txt")
 cat("
     model{
-    
+  
     #Priors
-    
-    #Species-specific Parameters
-    
-    for(s in 1:nspec){
-    
-    #Abundance parameters
-    alpha0[s] ~ dnorm(mu_a0, tau_a0) #intercept of lambda linear predictor
-    
-    alpha1[s] ~ dnorm(mu_a1, tau_a1) #coefficient for region covariate
-    
-    #Detection parameter
-    asig[s] ~ dnorm(mu_s, tau_s) #intercept of sigma linear predictor
-    
-    #Group size parameter
-    beta0[s] ~ dunif(0,50) #intercept of lam.gs linear predictor
-    
-    beta1[s] ~ dnorm(0, 0.01) #coefficient for region covariate
-    
-    }
     
     #Hyperparameters
     
@@ -77,21 +58,30 @@ cat("
     
     r.N ~ dunif(0,100)
     
-    #Likelihood
-    
-    ## Part 1
-    
-    for(i in 1:nobs){
-    
-    dclass[i] ~ dcat(fc[1:nD, rep[i], site[i], spec[i]])
-    
-    }#end i loop
+    #Species-specific Parameters
     
     for(s in 1:nspec){
+    
+    #Abundance parameters
+    alpha0[s] ~ dnorm(mu_a0, tau_a0) #intercept of lambda linear predictor
+    
+    alpha1[s] ~ dnorm(mu_a1, tau_a1) #coefficient for region covariate
+    
+    #Detection parameter
+    asig[s] ~ dnorm(mu_s, tau_s) #intercept of sigma linear predictor
+    
+    #Group size parameter
+    beta0[s] ~ dunif(0,50) #intercept of lam.gs linear predictor
+    
+    beta1[s] ~ dnorm(0, 0.01) #coefficient for region covariate
+    
+    ##Likelihood
     
     for(j in 1:nsites){
     
     for(t in 1:nreps[j]){
+    
+    ## Part 1
     
     # construct cell probabilities for nG cells using numerical integration
     # sum of the area (rectangles) under the detection function
@@ -127,22 +117,7 @@ cat("
     #Linear Predictor for Lambda
     lambda[t,j,s] <- exp(alpha0[s] + alpha1[s] * region[j])
     
-    }#end t loop
-    
-    }#end j loop
-    
-    #Linear Predictor for Sigma
-    sigma[s] <- exp(asig[s])
-    
-    }#end s loop
-    
-    ## Group size
-    
-    for(s in 1:nspec){
-    
-    for(j in 1:nsites){
-
-    for(t in 1:nreps[j]){
+    ##Group size
     
     gs.lam[t,j,s] <- exp(beta0[s] + beta1[s] * region[j] ) 
     gs.lam.star[t,j,s] <- gs.lam[t,j,s] * gs.rho[t,j,s]
@@ -150,11 +125,23 @@ cat("
     
     }#end t loop
 
+    psite[j,s] <- mean(pcap[1:nreps[j], j, s])
+    
     }#end j loop
+    
+    #Linear Predictor for Sigma
+    sigma[s] <- exp(asig[s])
+    
+    #Detection probability per species
+    Dprop[s] <- mean(psite[1:nsites, s])
     
     }#end s loop
     
+    #Observation i to t,j,s
+    
     for(i in 1:nobs){
+    
+    dclass[i] ~ dcat(fc[1:nD, rep[i], site[i], spec[i]])
     
     gs[i] ~ dpois(gs.lam.star[rep[i], site[i], spec[i]]) T(1,)
     
@@ -167,11 +154,11 @@ cat("
     for(j in 1:nsites){
     
     for(t in 1:nreps[j]){
-
+    
     GSrep[t,j,s] <- N[t,j,s] * gs.lam.star[t,j,s]
-
+    
     }#end t loop
-
+    
     GSsite[j,s] <- mean(GSrep[1:nreps[j], j, s])
     DenGSsite[j,s] <- GSsite[j,s] / area[j]
     
@@ -180,7 +167,7 @@ cat("
     GS[s] <- sum(GSsite[1:nsites, s])
     
     DenGS[s] <- mean(DenGSsite[1:nsites, s]) * 100 #per 100 km2
-
+    
     RegDen[s,1] <- mean(DenGSsite[1:13, s]) * 100 #per 100 km2
     RegDen[s,2] <- mean(DenGSsite[14:17, s]) * 100 #per 100 km2
     
@@ -213,7 +200,7 @@ inits <- function(){list(N = Nst, mu_a0 = runif(1, 0, 1), tau_a0 = runif(1, 0, 1
 #--------------------#
 
 params<-c('mu_a0', 'mu_a1', 'mu_s', 'tau_a0', 'tau_a1', 'tau_s', 
-          'alpha0', 'alpha1', 'beta0', 'beta1', 'GS', 'DenGS', 'RegDen')
+          'alpha0', 'alpha1', 'beta0', 'beta1', 'GS', 'DenGS', 'RegDen', 'Dprop')
 
 #---------------#
 #-MCMC settings-#
