@@ -9,6 +9,11 @@
 
 setwd("C:/Users/farrm/Documents/GitHub/CDSM/DataAnalysis")
 
+#----------#
+#-Set Seed-#
+#----------#
+set.seed(4567)
+
 #---------------#
 #-Load Libaries-#
 #---------------#
@@ -53,6 +58,11 @@ cat("
     mu_a1 ~ dnorm(0, 0.01)
     sig_a1 <- 1/sqrt(tau_a1)
     tau_a1 ~ dgamma(0.1, 0.1)
+
+    #Beta1
+    mu_b1 ~ dnorm(0, 0.01)
+    sig_b1 <- 1/sqrt(tau_b1)
+    tau_b1 ~ dgamma(0.1, 0.1)
     
     #Group Size Gamma Parameter
     
@@ -73,7 +83,8 @@ cat("
     #Group size parameter
     beta0[s] ~ dunif(0,50) #intercept of lam.gs linear predictor
     
-    beta1[s] ~ dnorm(0, 0.01) #coefficient for region covariate
+    #beta1[s] ~ dnorm(0, 0.01) #coefficient for region covariate
+    beta1[s] ~ dnorm(mu_b1, tau_b1)
     
     ##Likelihood
     
@@ -115,7 +126,7 @@ cat("
     N[t,j,s] ~ dpois(lambda[t,j,s])
     
     #Linear Predictor for Lambda
-    lambda[t,j,s] <- exp(alpha0[s] + alpha1[s] * region[j])
+    lambda[t,j,s] <- exp(alpha0[s] + alpha1[s] * region[j] + log(offset))
     
     ##Group size
     
@@ -136,6 +147,8 @@ cat("
     Dprop[s] <- mean(psite[1:nsites, s])
     
     }#end s loop
+
+    TotalDprop <- mean(Dprop[])
     
     #Observation i to t,j,s
     
@@ -155,18 +168,25 @@ cat("
     
     for(t in 1:nreps[j]){
     
-    GSrep[t,j,s] <- N[t,j,s] * gs.lam.star[t,j,s]
+    #GSrep[t,j,s] <- N[t,j,s] * gs.lam.star[t,j,s]
+    GSrep[t,j,s] <- lambda[t,j,s] * gs.lam.star[t,j,s]
     
     }#end t loop
     
     GSsite[j,s] <- mean(GSrep[1:nreps[j], j, s])
+    lambda.N[j,s] <- mean(lambda[1:nreps[j], j, s])
+    lambda.G[j,s] <- mean(gs.lam.star[1:nreps[j], j, s])
     DenGSsite[j,s] <- GSsite[j,s] / area[j]
     
     }#end j loop
     
-    GS[s] <- sum(GSsite[1:nsites, s])
-    
+    #GS[s] <- sum(GSsite[1:nsites, s])
+    GS[s] <- mean(GSsite[1:nsites, s])   
+
     DenGS[s] <- mean(DenGSsite[1:nsites, s]) * 100 #per 100 km2
+
+    RegGS[s,1] <- mean(GSsite[1:13, s])
+    RegGS[s,2] <- mean(GSsite[14:17, s])
     
     RegDen[s,1] <- mean(DenGSsite[1:13, s]) * 100 #per 100 km2
     RegDen[s,2] <- mean(DenGSsite[14:17, s]) * 100 #per 100 km2
@@ -199,8 +219,11 @@ inits <- function(){list(N = Nst, mu_a0 = runif(1, 0, 1), tau_a0 = runif(1, 0, 1
 #-Parameters to save-#
 #--------------------#
 
-params<-c('mu_a0', 'mu_a1', 'mu_s', 'tau_a0', 'tau_a1', 'tau_s', 
-          'alpha0', 'alpha1', 'beta0', 'beta1', 'GS', 'DenGS', 'RegDen', 'Dprop')
+params<-c('mu_a0', 'mu_a1', 'mu_s', 'mu_b1', 'tau_b1', 'tau_a0', 'tau_a1', 'tau_s', 'sigma',
+          'alpha0', 'alpha1', 'beta0', 'beta1', 'GS', 'DenGS', 'RegDen', 
+          'Dprop', 'TotalDprop', 'RegGS')
+
+params<-c('lambda.N', 'lambda.G')
 
 #---------------#
 #-MCMC settings-#
