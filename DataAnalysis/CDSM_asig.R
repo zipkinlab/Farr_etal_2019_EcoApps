@@ -1,0 +1,245 @@
+#---------------------------------------------------------#
+#----Community distance sampling model -------------------#
+#----Script lasted edited by Matthew Farr (3/28/17)-------#
+#---------------------------------------------------------#
+
+#-----------------------#
+#-Set Working Directory-#
+#-----------------------#
+
+setwd("C:/Users/farrm/Documents/GitHub/CDSM/DataAnalysis")
+
+#----------#
+#-Set Seed-#
+#----------#
+set.seed(4567)
+
+#---------------#
+#-Load Libaries-#
+#---------------#
+
+library(jagsUI)
+
+#-----------#
+#-Load Data-#
+#-----------#
+
+DSdata <- dget("C:/Users/farrm/Documents/GitHub/CDSM/DataFormat/DSdata")
+
+#---------------#
+#-Attach DSdata-#
+#---------------#
+
+attach(DSdata)
+
+#------------#
+#-BUGS Model-#
+#------------#
+
+sink("CDSM.txt")
+cat("
+    model{
+    
+    #Priors
+    
+    #Hyperparameters
+    
+    #Sigma
+    mu_s ~ dnorm(0, 0.01)
+    tau_s <- 1/(sig_s * sig_s)
+    sig_s ~ dunif(0, 500)
+    
+    #Alpha0
+    mu_a0 ~ dnorm(0, 0.01)
+    sig_a0 <- 1/sqrt(tau_a0)
+    tau_a0 ~ dgamma(0.1, 0.1)
+    
+    #Alpha1
+    mu_a1 ~ dnorm(0, 0.01)
+    sig_a1 <- 1/sqrt(tau_a1)
+    tau_a1 ~ dgamma(0.1, 0.1)
+    
+    #Beta1
+    mu_b1 ~ dnorm(0, 0.01)
+    sig_b1 <- 1/sqrt(tau_b1)
+    tau_b1 ~ dgamma(0.1, 0.1)
+    
+    #Group Size Gamma Parameter
+    
+    r.N ~ dunif(0,100)
+    
+    #Species-specific Parameters
+    
+    for(s in 1:nspec){
+    
+    #Abundance parameters
+    alpha0[s] ~ dnorm(mu_a0, tau_a0) #intercept of lambda linear predictor
+    
+    alpha1[s] ~ dnorm(mu_a1, tau_a1) #coefficient for region covariate
+    
+    #Detection parameter
+    for(k in 1:5){
+    asig[k,s] ~ dnorm(mu_s, tau_s) #intercept of sigma linear predictor
+    }
+    #asig[4,s] <- (asig[1,s] + asig[3,s])/2
+    #asig[5,s] <- (asig[2,s] + asig[3,s])/2
+    
+    #Group size parameter
+    beta0[s] ~ dunif(0,50) #intercept of lam.gs linear predictor
+    
+    #beta1[s] ~ dnorm(0, 0.01) #coefficient for region covariate
+    beta1[s] ~ dnorm(mu_b1, tau_b1)
+    
+    ##Likelihood
+    
+    for(j in 1:nsites){
+    
+    for(t in 1:nreps[j]){
+    
+    ## Part 1
+    
+    # construct cell probabilities for nG cells using numerical integration
+    # sum of the area (rectangles) under the detection function
+    for(k in 1:nD){
+    
+    # half normal detection function at midpt (length of rectangle)
+    g[k,t,j,s] <- exp(-mdpt[k]*mdpt[k]/(2*sigma[t,j,s]*sigma[t,j,s]))
+    
+    # probability of x in each interval (width of rectangle) for both sides of the transect
+    pi[k,t,j,s] <- v/B
+    
+    # detection probability for each interval (area of each rectangle)
+    f[k,t,j,s] <- g[k,t,j,s] * pi[k,t,j,s]
+    
+    # conditional detection probability (scale to 1)
+    fc[k,t,j,s] <- f[k,t,j,s]/pcap[t,j,s]
+    
+    }#end k loop
+    
+    # detection probability at each site (sum of rectangles)
+    pcap[t,j,s] <- sum(f[1:nD,t,j,s])
+
+    
+    #Linear Predictor for Sigma
+    sigma[t,j,s] <- exp(asig[car[t,j],s])
+    
+    ## Part 2
+    
+    #Observed population @ each t,j,s
+    y[t,j,s] ~ dbin(pcap[t,j,s], N[t,j,s])
+    
+    ## Part 3
+    
+    #Population @ each t,j,s
+    N[t,j,s] ~ dpois(lambda[t,j,s])
+    
+    #Linear Predictor for Lambda
+    lambda[t,j,s] <- exp(alpha0[s] + alpha1[s] * region[j] + log(offset[j]) + est[t,j,s])
+    
+    ##Group size
+    
+    gs.lam[t,j,s] <- exp(beta0[s] + beta1[s] * region[j] ) 
+    gs.lam.star[t,j,s] <- gs.lam[t,j,s] * gs.rho[t,j,s]
+    gs.rho[t,j,s] ~ dgamma(r.N, r.N)
+    
+    }#end t loop
+    
+    psite[j,s] <- mean(pcap[1:nreps[j], j, s])
+    
+    }#end j loop
+    
+    #Detection probability per species
+    Dprop[s] <- mean(psite[1:nsites, s])
+    
+    }#end s loop
+    
+    TotalDprop <- mean(Dprop[])
+    
+    #Observation i to t,j,s
+    
+    for(i in 1:nobs){
+    
+    dclass[i] ~ dcat(fc[1:nD, rep[i], site[i], spec[i]])
+    
+    gs[i] ~ dpois(gs.lam.star[rep[i], site[i], spec[i]]) T(1,)
+    
+    }#end i loop
+    
+    ## Derived quantities
+    
+    for(s in denspec){
+    
+    for(j in 1:nsites){
+    
+    for(t in 1:nreps[j]){
+    
+    #GSrep[t,j,s] <- N[t,j,s] * gs.lam.star[t,j,s]
+    GSrep[t,j,s] <- lambda[t,j,s] * gs.lam.star[t,j,s]
+    
+    }#end t loop
+    
+    GSsite[j,s] <- mean(GSrep[1:nreps[j], j, s])
+    lambda.N[j,s] <- mean(lambda[1:nreps[j], j, s])
+    lambda.G[j,s] <- mean(gs.lam.star[1:nreps[j], j, s])
+    DenGSsite[j,s] <- GSsite[j,s] / area[j]
+    
+    }#end j loop
+    
+    #GS[s] <- sum(GSsite[1:nsites, s])
+    GS[s] <- mean(GSsite[1:nsites, s])   
+    
+    DenGS[s] <- mean(DenGSsite[1:nsites, s]) * 100 #per 100 km2
+    
+    RegGS[s,1] <- mean(GSsite[1:13, s])
+    RegGS[s,2] <- mean(GSsite[14:17, s])
+    
+    RegDen[s,1] <- mean(DenGSsite[1:13, s]) * 100 #per 100 km2
+    RegDen[s,2] <- mean(DenGSsite[14:17, s]) * 100 #per 100 km2
+    
+    }#end s loop
+    
+    }
+    ",fill=TRUE)
+sink()
+
+#-------------------#
+#-Compile BUGS data-#
+#-------------------#
+
+data <- list(nspec = nspec, nD = nD, v = v, area = area, site = site, rep = rep, spec = spec, 
+             y = y, B = B, mdpt = mdpt, nobs = nobs, dclass = dclass, nsites = nsites, 
+             nreps = nreps, gs = gs, region = region, denspec = denspec, offset = offset, car = car)
+
+#---------------#
+#-Inital values-#
+#---------------#
+
+Nst <- y + 1
+asig = array(runif(1,5,6), dim = c(5, nspec))
+
+inits <- function(){list(N = Nst, mu_a0 = runif(1, 0, 1), tau_a0 = runif(1, 0, 1),
+                         mu_s = runif(1, 5, 6), sig_s=runif(1), 
+                         mu_a1 = runif(1, 0, 1), tau_a1 = runif(1, 0, 1))}
+
+#--------------------#
+#-Parameters to save-#
+#--------------------#
+
+params<-c('mu_a0', 'mu_a1', 'mu_s', 'mu_b1', 'tau_b1', 'tau_a0', 'tau_a1', 'tau_s', 'asig',
+          'alpha0', 'alpha1', 'beta0', 'beta1', 'GS', 'DenGS', 'RegDen', 
+          'Dprop', 'TotalDprop', 'RegGS')
+
+params<-c('lambda.N', 'lambda.G', 'mu_s', 'tau_s', 'Dprop', 'TotalDprop', 'asig')
+
+#---------------#
+#-MCMC settings-#
+#---------------#
+
+nc <- 3
+ni <- 250000
+nb <- 200000
+nt <- 10
+
+CDSM <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "CDSM.txt", 
+             n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, store.data = FALSE, parallel = TRUE)
+
