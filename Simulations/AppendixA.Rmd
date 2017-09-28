@@ -5,7 +5,7 @@ output:
     fig_caption: false
 
 ---
-Straight line survey routes were infeasible due to impassible terrain and off-road restrictions; thus surveys were designed to maximize coverage of the Talek region and Mara Triangle.
+Straight line survey routes were infeasible due to impassible terrain and off-road restrictions; thus surveys were designed to maximize coverage of the Talek region and Mara Triangle (Figure 1).
 
 
 ![Figure1](../PostAnalysis/Figure1.png)
@@ -13,9 +13,11 @@ Straight line survey routes were infeasible due to impassible terrain and off-ro
 
 The curvatures of winding surveys do not violate the assumption of distance sampling or pose a serious issue to estimating detection probabilities (Hiby & Krishna 2001). However, winding surveys may violate the assumption of random placement, which ensures a representative sample of distances to observations for estimation of detection probability (Buckland et al. 1993). We conducted a simulation study to examine any biases created by winding surveys and to compare performance to straight surveys with random placement. We checked for biases in the scale parameter, $\sigma$, for detection probability, the number of groups within the sampling boundary (i.e., transect width of 1300 m), the abundance (derived from mean number of groups and mean group size) within the sampling boundary, the number of groups within the entire study region, and the abundance within the entire study region.
 
-We simulate the location of groups assuming a uniform distribution for the intensity of groups across the study region. We additional simulate group sizes for each group. We sample from the simulated data using distance sampling with both winding and staight survey designs. We then compare the relative biases of the estimated parameters and the true parameters between winding and straight survey designs using a hierarchical distance sampling model (i.e., does not include a multi-species component).
+To do this, we generate count data for a single species across the study region by simulating the location of groups assuming a uniform distribution for the intensity of groups. We then simulate group sizes for each group following the model in the main text. We sample from the simulated data using distance sampling with both winding and staight survey designs. We then compare the relative biases of the estimated parameters and the true parameters between winding and straight survey designs using a hierarchical distance sampling model (i.e., does not include a multi-species component).
 
-We ran 100 iterations for simulating the locations of groups and group sizes and ran 10 sub-iterations to sub-sample for each sampling design for a total of 1000 simulations for each sampling design. For each iteration, observations (groups not individuals) are distributed uniformly across the sampling area. Group sizes are then simulated for each group. For each sub-iteration, the iteration of uniformly distributed observations is resampled. 
+We generated 100 datasets for simulating the locations of groups and group sizes and ran 10 sub-iterations to sub-sample for each sampling design for a total of 1000 simulations for each sampling design. For each iteration, observations (groups not individuals) are distributed uniformly across the sampling area. Group sizes are then simulated for each group. For each sub-iteration, the iteration of uniformly distributed observations is resampled. 
+
+The results of the simulation study show that the winding survey is slightly more biased (8.87 % more biased) for the number of groups within the sampling boundary when compared to the straight survey (Table 1). This also holds true for the number of groups within the enitre study region (winding surveys are 6.44% more biased). However, abundance within the sampling boundary and for the entire study region are similar between the two survey methods, and there is no increase in bias for the scale parameter, $\sigma$, which influences detection. We concluded that the winding survey design did not have a signifcant enough increase in bias to impact our results. Additionally, we assume that any potential biases caused by winding transects would have a similar influence in both management regions and would only affect absolute, but not relative, abundance estimates.
 
 **Table 1.** The mean relative biases (percent) for our 5 parameters of interest for the winding survey design and the straigh survey design when compared to the true values. 
 ```{r, comment=NA, echo=FALSE}
@@ -23,9 +25,8 @@ load(file = "summary.R")
 round(summary, digits = 2)
 ```
 
-The results of the simulation study show that the winding survey is slightly more biased (8.87 % more biased) for the number of groups within the sampling boundary when compared to the straight survey. This also holds true for the number of groups within the enitre study region (winding surveys are 6.44% more biased). However, abundance within the sampling boundary and for the entire study region are similar between the 2 survey methods, and the bias for the sacle parameter, $\sigma$, was less bias than the straight survey (9.04% less biased). We concluded that the winding survey design did not increase bias enough to be an issue. Additionally, biases affected estimates similarly between management regimes.
 
-Below is the annotated code for the simulation study for a single iteration and sub iteration. To see complete code for simulation study, please go to [GitHub](https://github.com/farrmt/HMSDS/tree/master/Simulations) or Zenodo.
+Below is the annotated code for the simulation study for a single simulation. To see complete code for the simulation study, please go to [GitHub](https://github.com/farrmt/HMSDS/tree/master/Simulations).
 
 ## Annotated code
 
@@ -872,4 +873,4 @@ bias
 
 Buckland, S.T., Anderson, D.R., Burnham, K.P. & Laake, J.L. (1993) Distance Sampling: Estimating Abundance of Biological Populations. Oxford University Press, Oxford.
 
-Hiby, L. & Krishna, M.B. (2001) Line transect sampling from a curving path. Biometrics, 57, 727–731.
+Hiby, L. & Krishna, M.B. (2001) Line transect sampling from a curving path. Biometrics, 57, 727â731.
