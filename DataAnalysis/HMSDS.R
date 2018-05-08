@@ -48,38 +48,39 @@ cat("
     #-PRIORS-#
     #--------#
 
+    #Gamma0
+    mu_s ~ dunif(0, 8)            #Mean
+    tau_s <- 1/(sig_s * sig_s)    #Precision
+    sig_s ~ dunif(0, 8)           #Variance
+
     #Sigma
-    mu_s ~ dunif(0, 8)         #Mean
-    tau_s <- 1/(sig_s * sig_s)   #Precision
-    sig_s ~ dunif(0, 8)        #Variance
+    gamma1 ~ dnorm(0, 0.01)       #Effect of body size
+    gamma2 ~ dnorm(0, 0.01)       #Effect of region
     
     #Alpha0
-    mu_a0 ~ dnorm(0, 0.01)       #Mean
-    tau_a0 ~ dgamma(0.1, 0.1)    #Precision
-    sig_a0 <- 1/sqrt(tau_a0)     #Variance
+    mu_a0 ~ dnorm(0, 0.01)        #Mean
+    tau_a0 ~ dgamma(0.1, 0.1)     #Precision
+    sig_a0 <- 1/sqrt(tau_a0)      #Variance
 
-    
     #Alpha1
-    mu_a1 ~ dnorm(0, 0.01)       #Mean
-    tau_a1 ~ dgamma(0.1, 0.1)    #Precision
-    sig_a1 <- 1/sqrt(tau_a1)     #Variance
-
+    mu_a1 ~ dnorm(0, 0.01)        #Mean
+    tau_a1 ~ dgamma(0.1, 0.1)     #Precision
+    sig_a1 <- 1/sqrt(tau_a1)      #Variance
 
     #Beta1
-    mu_b1 ~ dnorm(0, 0.01)       #Mean
-    tau_b1 ~ dgamma(0.1, 0.1)    #Precision
-    sig_b1 <- 1/sqrt(tau_b1)     #Variance
+    mu_b1 ~ dnorm(0, 0.01)        #Mean
+    tau_b1 ~ dgamma(0.1, 0.1)     #Precision
+    sig_b1 <- 1/sqrt(tau_b1)      #Variance
 
-    
-    #Gamma
-    r.N ~ dunif(0,100)           #Number of groups
-    r.G ~ dunif(0,100)           #Group size
+    #Overdispersion
+    r.N ~ dunif(0,100)            #Number of groups
+    r.G ~ dunif(0,100)            #Group size
 
     for(s in social){
 
     #Expected Group Size
-    beta0[s] ~ dunif(0,50)           #intercept parameter
-    beta1[s] ~ dnorm(mu_b1, tau_b1)  #effect parameter
+    beta0[s] ~ dunif(0,50)           #Intercept parameter
+    beta1[s] ~ dnorm(mu_b1, tau_b1)  #Effect parameter
 
     } #end s loop
     
@@ -89,19 +90,19 @@ cat("
     tau_p[s] ~ dgamma(0.1, 0.1)  #Precision
     sig_p[s] <- 1/sqrt(tau_p[s]) #Variance
     
-    #Detection
-    #sigma[s] ~ dnorm(mu_s, tau_s) #scale parameter
-
-    sigma[s] <- exp(asig[s])
-    asig[s] ~ dnorm(mu_s, tau_s)
+    #Sigma
+    gamma0[s] ~ dnorm(mu_s, tau_s)  #Intercept parameter
     
     #Expected Number of Groups
-    alpha0[s] ~ dnorm(mu_a0, tau_a0)    #intercept parameter
-    alpha1[s] ~ dnorm(mu_a1, tau_a1)    #effect parameter
+    alpha0[s] ~ dnorm(mu_a0, tau_a0)    #Intercept parameter
+    alpha1[s] ~ dnorm(mu_a1, tau_a1)    #Effect parameter
 
     for(j in 1:nsites){
 
-    psi[j,s] ~ dnorm(0, tau_p[s])       #transect effect parameter
+    psi[j,s] ~ dnorm(0, tau_p[s])       #Transect effect parameter
+
+    #Scale parameter
+    sigma[j,s] <- exp(gamma0[s] + gamma1 * size[s] + gamma2 * region[j])
 
     #------------#
     #-LIKELIHOOD-#
@@ -115,7 +116,7 @@ cat("
     for(k in 1:nD){
     
     #Half normal detection function at midpt (length of rectangle)
-    g[k,t,j,s] <- exp(-mdpt[k]*mdpt[k]/(2*sigma[s]*sigma[s]))
+    g[k,t,j,s] <- exp(-mdpt[k]*mdpt[k]/(2*sigma[j,s]*sigma[j,s]))
     
     #Proportion of each interval (width of rectangle) for both sides of the transect
     pi[k,t,j,s] <- v/B
@@ -229,10 +230,10 @@ sink()
 #-Compile BUGS data-#
 #-------------------#
 
-data <- list(nspec = nspec, nD = nD, v = v, area = area, site = site, rep = rep, spec = spec, 
+data <- list(nspec = nspec, nD = nD, v = v, site = site, rep = rep, spec = spec, 
              y = y, B = B, mdpt = mdpt, nobs = nobs, dclass = dclass, nsites = nsites, 
              nreps = nreps, gs = gs, s.site = s.site, s.rep = s.rep, s.spec = s.spec, nsoc = nsoc, 
-             social = social, region = region, offset = offset)
+             social = social, region = region, offset = offset, size = abs)
 
 #---------------#
 #-Inital values-#
@@ -249,8 +250,11 @@ inits <- function(){list(mu_s = runif(1, 3.5, 5.5), sig_s=runif(1), asig = exp(r
 #-Parameters to save-#
 #--------------------#
 
-params <- c('mu_s', 'sig_s', 'mu_a0', 'sig_a0', 'mu_a1', 'sig_a1', 'mu_b1', 'sig_b1', 
-            'r.N', 'r.G', 'sigma_psi', 'asig', 'alpha0', 'alpha1', 'beta0', 'beta1', 'RegGS')
+params <- c('mu_s', 'sig_s', 'gamma0', 'gamma1', 'gamma2', 
+            'mu_a0', 'sig_a0', 'alpha0',
+            'mu_a1', 'sig_a1', 'alpha1', 
+            'beta0', 'mu_b1', 'sig_b1', 'beta1',
+            'r.N', 'r.G', 'sigma_psi', 'RegGS')
 
 #---------------#
 #-MCMC settings-#
@@ -261,6 +265,6 @@ ni <- 150000
 nb <- 100000
 nt <- 10
 
-HMSDS <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "HMSDS.txt", 
+HMSDS3 <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "HMSDS.txt", 
                          n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, parallel = TRUE)
 
