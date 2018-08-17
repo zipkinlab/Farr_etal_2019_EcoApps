@@ -10,7 +10,7 @@
 #-Set Working Directory-#
 #-----------------------#
 
-setwd("C:/Users/farrm/Documents/GitHub/HMSDS/DataAnalysis")
+setwd("./DataAnalysis")
 
 #----------#
 #-Set Seed-#
@@ -28,7 +28,7 @@ library(jagsUI)
 #-Load Data-#
 #-----------#
 
-DSdata <- dget("C:/Users/farrm/Documents/GitHub/HMSDS/DataFormat/DSdata")
+DSdata <- dget("../DataFormat/DSdata")
 
 #---------------#
 #-Attach DSdata-#
