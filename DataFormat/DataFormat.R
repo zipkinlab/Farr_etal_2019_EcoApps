@@ -1,12 +1,13 @@
-#----------------------------------------------#
-#----Formatting CDSM data from raw csv file----#
-#----Last edited by Matthew Farr 2/17/17-------#
-#----------------------------------------------#
+#-------------------------------------------#
+#----Formatting DSdata from raw csv file----#
+#----Created by Matthew Farr----------------#
+#-------------------------------------------#
 
 #-----------------------#
 #-Set working directory-#
 #-----------------------#
-setwd("C:/Users/farrm/Documents/GitHub/CDSM/DataFormat")
+
+setwd("./DataFormat")
 
 #----------------#
 #-Load libraries-#
@@ -19,7 +20,7 @@ library(tidyr)
 #-Import CSV-#
 #------------#
 
-raw <- read.csv("C:/Users/farrm/Documents/GitHub/CDSM/RawData/CDSM_rawdata.csv", header=TRUE)
+raw <- read.csv("../RawData/HMSDS_rawdata.csv", header=TRUE)
 raw <- tbl_df(raw)
 
 #Sort by species
@@ -103,20 +104,63 @@ nobs <- sum(y, na.rm = TRUE)
 #Number of distance classes
 nD <- length(mdpt)
 
+#Index for nine species
+aspec <- c(1,2,3,6,8)
+
+social <- c(1,2,3,5,6,8,11)
 
 #-----------------------------------#
 #-Import group size of observations-#
 #-----------------------------------#
 
-gs <- raw$Count
+#Filter out solitary species
+G <- filter(raw, raw$Animal != "Caracal", raw$Animal != "Leopard",
+            raw$Animal != "Serval", raw$Animal != "SideStripedJackal") 
+#Group size
+gs <- G$Count
+
+#Site ID for social species
+s.site <- G$Site_ID
+
+#Replicate ID
+s.rep <- G$Sample_ID
+
+#Species ID
+s.spec <- as.integer(G$Animal)
+
+#Number of social species observations
+nsoc <- length(gs)
+
+#--------------------#
+#-Average group size-#
+#--------------------#
+
+#NEITHER USED IN FINAL DETECTION MODEL
+
+#Observed from data
+ags <- rep(1, 11)
+for(i in social){ags[i] <- mean(raw$Count[spec==i])}
+ags <- scale(ags)
+
+#Reported from Gittleman 1989 pg 189 - 191
+ags2 <- c(17, 2, 2, 1, 1, 6, 1, 9, 1, 2, 2)
+ags2 <- scale(ags2)
+
+#-------------------#
+#-Average body size-#
+#-------------------#
+
+#Reported from Gittleman 1989 pg 189 - 191
+abs <- c(1.26, 3.94, 7.69, 11.59, 58.56, 51.94, 52.46, 166.02, 11.70, 11.25, 0.49)
+abs <- scale(abs)
 
 #----------------------------#
-#-Sampling area of each site-#
+#-Offset for transect length-#
 #----------------------------#
 
-area <- as.vector(c(11.6542, 11.9619, 12.4702, 12.5182, 10.7843, 10.2384, 10.7495, 
-                    12.0545, 9.0114, 11.2589, 10.4075, 9.7834, 11.8226, 10.5295,
-                    11.5376, 14.8511, 14.0352))
+offset <- as.vector(c(1, 1, 1, 1, 1, 1, 1, 1.080,
+                      0.878, 1, 1, 1, 1, 1, 1.100,
+                      1.300, 1.237))
 
 #-------------------------#
 #-Create Region Covariate-#
@@ -124,18 +168,38 @@ area <- as.vector(c(11.6542, 11.9619, 12.4702, 12.5182, 10.7843, 10.2384, 10.749
 
 region <- c(rep(0, 13), rep(1, 4))
 
+#-------------------#
+#-Vehicle Covariate-#
+#-------------------#
+
+#NOT USED IN FINAL DETECTION MODEL
+
+car <- array(1, dim = c(16,17))
+car[1, 1:8] <- 3
+#car[5, 1:13] <- 4
+car[5, 1:13] <- 1
+car[3, 9:13] <- 2
+car[10, 9:13]  <- 3
+car[c(1, 7:9), 14:17] <- 2
+#car[2, 14:17] <- 5
+car[2, 14:17] <- 2
+car[c(3,4,6,11:13), 14:17] <- 3
+#car[10, 14:17] <- 4
+car[10, 14:17] <- 3
+
 #--------------#
 #-Combine data-#
 #--------------#
 
 DSdata <- list(y, dclass, v, B, site, rep, spec, mdpt, nsites, nreps, nspec, nobs, 
-               nD, gs, area, region)
+               nD, aspec, gs, s.site, s.rep, s.spec, nsoc, region, offset, car, social, ags, ags2, abs)
 heads <- c("y", "dclass", "v", "B", "site", "rep", "spec", "mdpt", "nsites", "nreps", 
-                          "nspec", "nobs", "nD", "gs", "area", "region")
+           "nspec", "nobs", "nD", "aspec", "gs", "s.site", "s.rep", "s.spec", "nsoc", "region",
+           "offset", "car", "social", "ags", "ags2", "abs")
 DSdata <- setNames(DSdata, nm = heads)
 
 #-------------#
 #-Export data-#
 #-------------#
 
-dput(DSdata, file = "C:/Users/farrm/Documents/GitHub/CDSM/DataFormat/DSdata")
+dput(DSdata, file = "C:/Users/farrm/Documents/GitHub/HMSDS/DataFormat/DSdata")
