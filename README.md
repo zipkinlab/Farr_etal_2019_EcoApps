@@ -2,7 +2,7 @@
 
 ### [Matthew T. Farr](https://farrmt.github.io/), [David S. Green](https://inr.oregonstate.edu/people/david-green), [Kay E. Holekamp](http://www.holekamplab.org/), [Gary J. Roloff](https://www.afwelsite.com/), & [Elise F. Zipkin](https://msu.edu/user/ezipkin/)
 
-### Ecological Applicatinos (*In Revision after Review*)
+### Ecological Applications (*In Revision after Review*)
 
 ### Please contact the first author for questions about the code or data: Matthew T. Farr (matthewtfarr@gmail.com)
 __________________________________________________________________________________________________________________________________________
