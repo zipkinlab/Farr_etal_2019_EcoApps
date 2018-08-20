@@ -119,6 +119,8 @@ G <- filter(raw, raw$Animal != "Caracal", raw$Animal != "Leopard",
 #Group size
 gs <- G$Count
 
+gs1 <- raw$Count
+
 #Site ID for social species
 s.site <- G$Site_ID
 
@@ -176,15 +178,12 @@ region <- c(rep(0, 13), rep(1, 4))
 
 car <- array(1, dim = c(16,17))
 car[1, 1:8] <- 3
-#car[5, 1:13] <- 4
 car[5, 1:13] <- 1
 car[3, 9:13] <- 2
 car[10, 9:13]  <- 3
 car[c(1, 7:9), 14:17] <- 2
-#car[2, 14:17] <- 5
 car[2, 14:17] <- 2
 car[c(3,4,6,11:13), 14:17] <- 3
-#car[10, 14:17] <- 4
 car[10, 14:17] <- 3
 
 #--------------#
@@ -192,9 +191,9 @@ car[10, 14:17] <- 3
 #--------------#
 
 DSdata <- list(y, dclass, v, B, site, rep, spec, mdpt, nsites, nreps, nspec, nobs, 
-               nD, aspec, gs, s.site, s.rep, s.spec, nsoc, region, offset, car, social, ags, ags2, abs)
+               nD, aspec, gs, gs1, s.site, s.rep, s.spec, nsoc, region, offset, car, social, ags, ags2, abs)
 heads <- c("y", "dclass", "v", "B", "site", "rep", "spec", "mdpt", "nsites", "nreps", 
-           "nspec", "nobs", "nD", "aspec", "gs", "s.site", "s.rep", "s.spec", "nsoc", "region",
+           "nspec", "nobs", "nD", "aspec", "gs", "gs1", "s.site", "s.rep", "s.spec", "nsoc", "region",
            "offset", "car", "social", "ags", "ags2", "abs")
 DSdata <- setNames(DSdata, nm = heads)
 
