@@ -1,3 +1,4 @@
+
     model{ 
     
     ##Priors
@@ -84,25 +85,26 @@
     
     ##Derived quantities
     
-    #Number of groups within
+    #Number of groups within sampling boundary
     Nin <- sum(N[1:nsites])
     
     for(j in 1:nsites){
     
-    #Abundance within
+    #Abundance at each transect
     Ntotal[j] <- lambda.star[j] * gs.lam.star[j]
     
     } #End j loop
     
+    #Abundance within sampling boundary
     Nintotal <- sum(Ntotal[])
     
     #Proportion of study region covered by sampling design
     D <- (939.316/164.4837)
     
-    #Number of total groups in sampling boundary
-    Ntwisty <- Nin * D
+    #Number of groups in entire study region
+    Nwinding <- Nin * D
     
-    #Abundance in sampling boundary
-    Ntwistytotal <- Nintotal * D
+    #Abundance in entire study region
+    Nwindingtotal <- Nintotal * D
 
     }

@@ -15,7 +15,7 @@ set.seed(1985)
 #-Set Working Directory-#
 #-----------------------#
 
-setwd("./Simulations")
+setwd("./SupportingInformation")
 
 #---------------#
 #-Load Libaries-#
@@ -64,7 +64,7 @@ B <- 650
 #----------------------------#
 
 #Directory for transects by site shapefile
-d.dir <- paste(getwd(), "/Transects", sep = "")
+d.dir <- "./Transects"
 
 #Transects by site
 Site1 <- readOGR(dsn = d.dir, layer = "Site1")

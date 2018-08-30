@@ -29,7 +29,7 @@ round(summary, digits = 2)
 
 This also holds true (winding surveys were 6.44% more biased) for the number of groups within the enitre study region (i.e., Groups). However, abundance within the sampling boundary (i.e., Abundance within) and for the entire study region (i.e., Abundance) were similar between the two survey methods, and there was no increase in bias for the scale parameter, $\sigma$, which influenced detection. We concluded that the winding survey design did not have a signifcant enough increase in bias to impact our results. Additionally, we assume that any potential biases caused by winding transects would have a similar influence in both management regions and would only affect absolute, but not relative, abundance estimates (summary of results, including the remaining tables and figures, are presented after the annotated code).
 
-Below is the annotated code for the simulation study for a single simulation. To see complete code for the simulation study, please go to [GitHub](https://github.com/farrmt/HMSDS/tree/master/Simulations).
+Below is the annotated code for the simulation study for a single simulation. To see complete code for the simulation study, please go to [GitHub](https://github.com/farrmt/HMSDS/blob/master/SupportingInformation/Simulation.R).
 
 ```{r set-opitions, echo=FALSE}
 options(width = 100)
@@ -40,11 +40,6 @@ options(width = 100)
 Set seed
 ```{r}
 set.seed(1985)
-```
-
-Set working directory
-```{r}
-setwd("C:/Users/farrm/Documents/GitHub/HMSDS/Simulations")
 ```
 
 Load R packages
@@ -100,7 +95,7 @@ B <- 650
 Create winding sampling design
 ```{r results="hide"}
 #Directory for sampling design shapefiles
-d.dir <- "C:/Users/farrm/Documents/GitHub/HMSDS/Simulations/Transects"
+d.dir <- "./Transects"
 
 #Import transect shapefiles
 Site1 <- readOGR(dsn = d.dir, layer = "Site1")
@@ -468,7 +463,7 @@ cat("
     #Abundance in entire study region
     Nwindingtotal <- Nintotal * D
 
-    }",fill=TRUE, file="ssds.txt")
+    }",fill=TRUE, file="HMSDS_model.txt")
 ```
 
 Compile BUGS data
@@ -497,7 +492,7 @@ nt <- 4
 
 Run model
 ```{r, message=FALSE}
-windingM <- jags(data = windingD, model.file = "ssds.txt",
+windingM <- jags(data = windingD, model.file = "HMSDS_model.txt",
                  inits = inits, parameters.to.save = params, 
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt)
 ```
@@ -708,7 +703,7 @@ inits <- function(){list(N = N.in, sigma = runif(10, 50, 350))}
 
 Run BUGS model
 ```{r, message=FALSE}
-altM <- jags(data = altD, model.file = "ssds.txt",
+altM <- jags(data = altD, model.file = "HMSDS_model.txt",
              inits = inits, parameters.to.save = params, 
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt)
 ```
