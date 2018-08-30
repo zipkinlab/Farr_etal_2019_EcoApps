@@ -15,12 +15,12 @@ Carnivore communities face unprecedented threats from humans. Management regimes
 ### [DataFormat](https://github.com/farrmt/HMSDS/tree/master/DataFormat): Contains code to format raw data for analysis and formatted data
 ### [PostAnalysis](https://github.com/farrmt/HMSDS/tree/master/PostAnalysis): Contains code to estimate posterior probabilities and to create figures
 ### [RawData](https://github.com/farrmt/HMSDS/tree/master/RawData): Contains CSV file of raw data
-### [SupportingInformation](https://github.com/farrmt/HMSDS/tree/master/Simulations): Contains code to run simulation of survey design and code to generate supporting information
+### [Simulations](https://github.com/farrmt/HMSDS/tree/master/Simulations): Contains code to run simulation (Appendix)
 
 ## Data
 See the following subdirectories for data and metadata: [RawData](https://github.com/farrmt/HMSDS/tree/master/RawData), [DataFormat](https://github.com/farrmt/HMSDS/tree/master/DataFormat)
 
 ## Code
-See the following subdirectories for code and metadata: [DataAnalysis](https://github.com/farrmt/HMSDS/tree/master/DataAnalysis), [DataFormat](https://github.com/farrmt/HMSDS/tree/master/DataFormat), [PostAnalysis](https://github.com/farrmt/HMSDS/tree/master/PostAnalysis), [SupportingInformation](https://github.com/farrmt/HMSDS/tree/master/SupportingInformation)
+See the following subdirectories for code and metadata: [DataAnalysis](https://github.com/farrmt/HMSDS/tree/master/DataAnalysis), [DataFormat](https://github.com/farrmt/HMSDS/tree/master/DataFormat), [PostAnalysis](https://github.com/farrmt/HMSDS/tree/master/PostAnalysis), [Simulations](https://github.com/farrmt/HMSDS/tree/master/Simulations)
 
 

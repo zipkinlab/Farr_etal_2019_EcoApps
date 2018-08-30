@@ -20,28 +20,31 @@ model{
   #Multinomial detection component
   for(i in 1:nobs){
     
-    dclass[i] ~ dcat(fct[1:nG, site[i]])
+    dclass[i] ~ dcat(fc[1:nG, site[i]])
     
   }#End i loop
   
   for(j in 1:nsites){
     
-    f.0[j] <- 2 * dnorm(0, 0, 1/sigma[j]^2)
-    
     #Construct cell probabilities for nG cells
     for(k in 1:nG){  
       
-      up[k,j]<-pnorm(db[k+1], 0, 1/sigma[j]^2) 
-      low[k,j]<-pnorm(db[k], 0, 1/sigma[j]^2) 
-      p[k,j]<- 2 * ( up[k,j] - low[k,j])
-      f[k,j]<- p[k,j]/f.0[j]/v                          
-      fc[k,j]<- f[k,j] * pi[k]       
-      fct[k,j]<-fc[k,j]/sum(fc[1:nG,j]) 
+      #Half normal detection function at midpt (length of rectangle)
+      p[k,j] <- exp(- midpt[k] * midpt[k] / (2 * sigma[j] * sigma[j])) 
+      
+      #Probability of x in each interval (width of rectangle)
+      pi[k,j] <- v/B 
+      
+      #Detection probability for each interval (area of each rectangle)
+      f[k,j] <- p[k,j] * pi[k,j] 
+      
+      #Conditional detection probability (scale to 1)
+      fc[k,j] <- f[k,j] / pcap[j] 
       
     }#End k loop
     
     #Detection probability at each site (sum of rectangles)
-    pcap[j] <- sum(fc[1:nG,j])               
+    pcap[j] <- sum(f[1:nG,j])               
     
     #Observation process
     y[j] ~ dbin(pcap[j], N[j])
