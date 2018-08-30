@@ -23,6 +23,12 @@ library(dplyr)
 library(tidyr)
 library(jagsUI)
 
+#----------#
+#-Set Seed-#
+#----------#
+
+set.seed(1985)
+
 #--------------------------#
 #-Create Sampling Boundary-#
 #--------------------------#
@@ -55,7 +61,7 @@ Ntotal <- sum(cs)
 sigma <- 300
 
 #Mid point of each distance class
-midpt <- seq(25, 650, 25)
+midpt <- seq(12.5, 650, 25)
 
 #Index for distance class
 nG <- length(midpt)
@@ -66,15 +72,9 @@ v <- 25
 #Transect half width
 B <- 650
 
-#----------------------------#
-#-Import Transect Shapefiles-#
-#----------------------------#
-
-#Directory for entire transect shapefile
-d.dir <- "C:/Users/farrm/OneDrive/Hyena Project/datasets/NewDatasets/Rscripts/ExcelFiles"
-
-#Entire Transect
-EL <- readOGR(dsn = d.dir, layer = "EL_Data")
+#-------------------------------#
+#-Create twisty sampling design-#
+#-------------------------------#
 
 #Directory for transects by site shapefile
 d.dir <- "C:/Users/farrm/OneDrive/Hyena Project/datasets/NewDatasets/Rscripts/ExcelFiles/Site"
@@ -102,7 +102,6 @@ Site17 <- readOGR(dsn = d.dir, layer = "Site17")
 #-Sample Coordinates from Transects-#
 #-----------------------------------#
 
-regpoints <- spsample(EL, 200, type = "regular")
 s1p <- spsample(Site1, 30, type = "regular")
 s2p <- spsample(Site2, 30, type = "regular")
 s3p <- spsample(Site3, 30, type = "regular")
@@ -304,59 +303,6 @@ nobs <- sum(yobs)
 #Group size
 gs <- Dcap[,5]
 
-#-----------------------#
-#-Generate Overlap Data-#
-#-----------------------#
-
-#Initialize overlap array
-overlap <- array(0, dim = c(Nin,J))
-
-for(i in 1:Nin){
-  for(j in 1:J){
-    
-    #Harvest potential overlap data for groups within 650 meters
-    if(ncap[i] == 1 && d[index[i],j] < 650)
-      overlap[i,j] <- d[index[i],j]
-  }
-}
-
-#Matirx of group ID (col 1) and transect point ID (col 2) within 650 meters
-OVA <- which(!overlap == 0, arr.ind = TRUE)
-OVA <- OVA[order(OVA[,1]),]
-
-#Initialize number of overlaps per site
-OVAsite <- NULL
-
-for(i in 1:length(OVA[,1])){
-  for(j in 1:nsites){
-    
-    #Corresponding site ID for each group ID
-    if(si[j] < OVA[i,2] && OVA[i,2] <= si[j+1])
-      OVAsite[i] <- j
-  }
-}
-
-#Combine site ID with dataframe
-OVA <- data.frame(OVA[,1], OVAsite)
-
-#Deletes duplicate values
-OVA <- unique(OVA)
-
-#Removes groups not seen in 2 sites
-OVA <- subset(OVA, duplicated(OVA[,1]) | duplicated(OVA[,1], fromLast = TRUE))
-
-#Determines number of overlap per site
-OVA <- group_by(OVA, OVAsite)%>%
-  summarize(n_distinct(OVA...1.))
-colnames(OVA) <- c("site", "overlaps")
-
-#Adds sites with no overlap
-miss <- OVA %>% expand(site = 1:nsites)
-miss$"overlaps" <- rep(0, length(miss))
-OVA <- full_join(OVA, miss, by = "site")
-OVA <- OVA %>% arrange(site)
-OVA[is.na(OVA)] <- 0
-
 #---------------#
 #-Model Offsets-#
 #---------------#
@@ -503,6 +449,8 @@ cat("
     
     fit <- sum(E[])
     fit.new <- sum(E.new[])
+
+    ptot <- mean(pcap[])
     }
     
     
@@ -526,7 +474,7 @@ inits <- function(){list(N = N.in, sigma = runif(17, 50, 350))}
 #Parameters to monitor
 params<-c('gs.lam', 'sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal', 
           'fit', 'fit.new', 'fit.obs', 'fit.obs.new', 'fit.ab', 
-          'fit.ab.new', 'fit.gs', 'fit.gs.new')
+          'fit.ab.new', 'fit.gs', 'fit.gs.new', 'ptot')
 
 #MCMC settings
 
@@ -841,9 +789,4 @@ rownames(bias) <- c("Nin", "Nintotal", "Nreal", "Nrealtotal", "sigma")
 
 bias
 
-#---------------------#
-#-Overlap Correlation-#
-#---------------------#
-
-cor(OVA[,2], (abs(colMeans((realM$sims.list$sigma - sigma)/sigma)) * 100))
 
