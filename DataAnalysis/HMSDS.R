@@ -265,6 +265,6 @@ ni <- 150000
 nb <- 100000
 nt <- 10
 
-HMSDS3 <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "HMSDS.txt", 
+HMSDS <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "HMSDS.txt", 
                          n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, parallel = TRUE)
 
