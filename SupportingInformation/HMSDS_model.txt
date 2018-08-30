@@ -1,0 +1,108 @@
+    model{ 
+    
+    ##Priors
+    
+    for(j in 1:nsites){
+    
+    #Abundance prior
+    alpha[j] ~ dnorm(0, 0.01)
+    
+    #Detection prior
+    sigma[j] ~ dunif(0, 500)
+    
+    }#End j loop
+
+    #OVerdispersion prior
+    r.N ~ dunif(0,100) 
+    r.G ~ dunif(0,100)
+    
+    #Group size prior
+    beta ~ dunif(0, 50)
+    
+    ##Likelihood
+    
+    #Multinomial detection component
+    for(i in 1:nobs){
+    
+    dclass[i] ~ dcat(fc[1:nG, site[i]])
+    
+    }#End i loop
+    
+    for(j in 1:nsites){
+    
+    #Construct cell probabilities for nG cells
+    for(k in 1:nG){  
+    
+    #Half normal detection function at midpt (length of rectangle)
+    p[k,j] <- exp(- midpt[k] * midpt[k] / (2 * sigma[j] * sigma[j])) 
+    
+    #Probability of x in each interval (width of rectangle)
+    pi[k,j] <- v/B 
+    
+    #Detection probability for each interval (area of each rectangle)
+    f[k,j] <- p[k,j] * pi[k,j] 
+    
+    #Conditional detection probability (scale to 1)
+    fc[k,j] <- f[k,j] / pcap[j] 
+    
+    }#End k loop
+    
+    #Detection probability at each site (sum of rectangles)
+    pcap[j] <- sum(f[1:nG,j])               
+    
+    #Observation process
+    y[j] ~ dbin(pcap[j], N[j])
+    
+    #Description of latent number of groups (negative binomial)
+    N[j] ~ dpois(lambda.star[j])
+
+    #Expected Number of Groups
+    lambda.star[j] <- rho[j] * lambda[j]
+
+    #Overdispersion parameter for Expected Number of Groups
+    rho[j] ~ dgamma(r.N, r.N)
+    
+    #Linear model for number of groups
+    lambda[j] <- exp(alpha[j] + log(offset[j]))
+
+    #Expected Group Size
+    gs.lam.star[j] <- gs.lam[j] * gs.rho[j]
+    
+    #Overdispersion parameter for Expected Group Size
+    gs.rho[j] ~ dgamma(r.G, r.G)
+
+    #Group size
+    gs.lam[j] <- exp(beta)
+    
+    }#End j loop
+    
+    for(i in 1:nobs){
+    
+    gs[i] ~ dpois(gs.lam.star[site[i]]) T(1,)
+    
+    }#End i loop
+    
+    ##Derived quantities
+    
+    #Number of groups within
+    Nin <- sum(N[1:nsites])
+    
+    for(j in 1:nsites){
+    
+    #Abundance within
+    Ntotal[j] <- lambda.star[j] * gs.lam.star[j]
+    
+    } #End j loop
+    
+    Nintotal <- sum(Ntotal[])
+    
+    #Proportion of study region covered by sampling design
+    D <- (939.316/164.4837)
+    
+    #Number of total groups in sampling boundary
+    Ntwisty <- Nin * D
+    
+    #Abundance in sampling boundary
+    Ntwistytotal <- Nintotal * D
+
+    }

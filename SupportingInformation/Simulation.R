@@ -1,9 +1,9 @@
-#------------------------------------------------------------------------------------------------#
-#----Simulation study comparing twisty sampling design to alternative straight line sampling.----#
-#----Data is simmulated for twisty sampling design of transects using actual transects.----------#
-#----Transects were imported as shapefiles. Alternative sampling design is simulated.------------#
-#----Script lasted edited by Matthew Farr (1/26/17)----------------------------------------------#
-#------------------------------------------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------------#
+#----Simulation study comparing winding sampling design to alternative straight line sampling.----#
+#----Data is simmulated for twisty sampling design of transects using actual transects.-----------#
+#----Transects were imported as shapefiles. Alternative sampling design is simulated.-------------#
+#----Script created by Matthew Farr --------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------------#
 
 #----------#
 #-Set Seed-#
@@ -15,7 +15,7 @@ set.seed(1985)
 #-Set Working Directory-#
 #-----------------------#
 
-setwd("C:/Users/farrm/Documents/GitHub/CDSM/Simulations")
+setwd("./Simulations")
 
 #---------------#
 #-Load Libaries-#
@@ -64,7 +64,7 @@ B <- 650
 #----------------------------#
 
 #Directory for transects by site shapefile
-d.dir <- "C:/Users/farrm/OneDrive/Hyena Project/datasets/NewDatasets/Rscripts/ExcelFiles/Site"
+d.dir <- paste(getwd(), "/Transects", sep = "")
 
 #Transects by site
 Site1 <- readOGR(dsn = d.dir, layer = "Site1")
@@ -134,15 +134,15 @@ A.site <- as.vector(c(11.6542, 11.9619, 12.4702, 12.5182, 10.7843, 10.2384, 10.7
 #-BUGS Model File Path-#
 #----------------------#
 
-modFile <- "C:/Users/farrm/Documents/GitHub/CDSM/Simulations/CDSM_model.txt"
+modFile <- "HMSDS_model.txt"
 
 #------------------#
 #-Begin Iterations-#
 #------------------#
 
 #Number of iterations
-niter <- 120	
-subniter <- 25
+niter <- 100	
+subniter <- 10
 
 #Starting iteration
 iter <- 1
@@ -152,7 +152,6 @@ bias <- array(NA, dim = c(5, 6, subniter, niter),
               dimnames = list(c("Groups In", "Abundance In", "Groups", "Abundance", "Sigma"), 
                               c("Twst True", "Twst Est", "Twst Bias", "Str True", "Str Est", "Str Bias"),
                               NULL, NULL))
-overlapcor <- array(NA, dim = c(niter, subniter))
 
 system.time(while(iter <= niter){
   
@@ -216,9 +215,6 @@ system.time(while(iter <= niter){
     
     #ID for distance class
     di <- seq(0,650,25)
-    
-    #Distance class
-    dclass <- rep(NA, N)
     
     #Minimum distance value
     dst <- rep(NA, N)
@@ -366,65 +362,12 @@ system.time(while(iter <= niter){
     #Group size
     gs <- Dcap[,5]
     
-    #-----------------------#
-    #-Generate Overlap Data-#
-    #-----------------------#
-    
-    #Initialize overlap array
-    overlap <- array(0, dim = c(Nin,J))
-    
-    for(i in 1:Nin){
-      for(j in 1:J){
-        
-        #Harvest potential overlap data for groups within 650 meters
-        if(ncap[i] == 1 && d[index[i],j] < 650)
-          overlap[i,j] <- d[index[i],j]
-      }
-    }
-    
-    #Matirx of group ID (col 1) and transect point ID (col 2) within 650 meters
-    OVA <- which(!overlap == 0, arr.ind = TRUE)
-    OVA <- OVA[order(OVA[,1]),]
-    
-    #Initialize number of overlaps per site
-    OVAsite <- NULL
-    
-    for(i in 1:length(OVA[,1])){
-      for(j in 1:nsites){
-        
-        #Corresponding site ID for each group ID
-        if(si[j] < OVA[i,2] && OVA[i,2] <= si[j+1])
-          OVAsite[i] <- j
-      }
-    }
-    
-    #Combine site ID with dataframe
-    OVA <- data.frame(OVA[,1], OVAsite)
-    
-    #Deletes duplicate values
-    OVA <- unique(OVA)
-    
-    #Removes groups not seen in 2 sites
-    OVA <- subset(OVA, duplicated(OVA[,1]) | duplicated(OVA[,1], fromLast = TRUE))
-    
-    #Determines number of overlap per site
-    OVA <- group_by(OVA, OVAsite)%>%
-      summarize(n_distinct(OVA...1.))
-    colnames(OVA) <- c("site", "overlaps")
-    
-    #Adds sites with no overlap
-    miss <- OVA %>% expand(site = 1:nsites)
-    miss$"overlaps" <- rep(0, length(miss))
-    OVA <- full_join(OVA, miss, by = "site")
-    OVA <- OVA %>% arrange(site)
-    OVA[is.na(OVA)] <- 0
-    
     #-------------------#
     #-Compile BUGS data-#
     #-------------------#
     
     #Input data
-    realD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
+    twistyD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
                       nobs = nobs, dclass = dclass, nsites = nsites, gs = gs, offset = A.site)
     
     #Initial values
@@ -433,7 +376,7 @@ system.time(while(iter <= niter){
     inits <- function(){list(N = N.in, sigma = runif(17, 50, 350))} 
     
     #Parameters to monitor
-    params<-c('sigma', 'Nin', 'Nintotal', 'Nreal', 'Nrealtotal')
+    params<-c('sigma', 'Nin', 'Nintotal', 'Ntwisty', 'Ntwistytotal')
     
     #MCMC settings
     
@@ -446,14 +389,14 @@ system.time(while(iter <= niter){
     #-Run BUGS Model-#
     #----------------#
     
-    realM <- jags(data = realD, inits = inits, parameters.to.save = params, model.file = modFile, 
+    twistyM <- jags(data = twistyD, inits = inits, parameters.to.save = params, model.file = modFile, 
                   n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, parallel = TRUE)
     
     #----------------------------------------#
     #-Save and Remove Data for Next Sampling-#
     #----------------------------------------#
     
-    realVals <- list(cbind(Din[,2], Din[,3]), cbind(Dcap[,2], Dcap[,3]), Nin, Nintotal)
+    twistyVals <- list(cbind(Din[,2], Din[,3]), cbind(Dcap[,2], Dcap[,3]), Nin, Nintotal, mean(p))
     
     rm(X, Y, nsites, J, si, di, dclass, dst, q, 
        site, d, y, index, Dtot, Din, Nin, Nintotal,
@@ -653,7 +596,7 @@ system.time(while(iter <= niter){
     #-Save and Remove Data for Next Sampling-#
     #----------------------------------------#
     
-    altVals <- list(cbind(Din[,2], Din[,3]), cbind(Dcap[,2], Dcap[,3]), Nin, Nintotal)
+    altVals <- list(cbind(Din[,2], Din[,3]), cbind(Dcap[,2], Dcap[,3]), Nin, Nintotal, mean(p))
     
     rm(X, Y, nsites, J, si, di, dclass, dst, q, 
        site, d, y, index, Dtot, Din, Nin, Nintotal,
@@ -664,46 +607,40 @@ system.time(while(iter <= niter){
     #-Bias Estimates-#
     #----------------#
       
-    bias[1, 1, subiter, iter] <- realVals[[3]]
-    bias[1, 2, subiter, iter] <- realM$mean$Nin
-    bias[1, 3, subiter, iter] <- (abs(mean((realM$sims.list$Nin - realVals[[3]])/realVals[[3]])) * 100)
+    bias[1, 1, subiter, iter] <- twistyVals[[3]]
+    bias[1, 2, subiter, iter] <- twistyM$mean$Nin
+    bias[1, 3, subiter, iter] <- (abs(mean((twistyM$sims.list$Nin - twistyVals[[3]])/twistyVals[[3]])) * 100)
     bias[1, 4, subiter, iter] <- altVals[[3]]
     bias[1, 5, subiter, iter] <- altM$mean$Nin
     bias[1, 6, subiter, iter] <- (abs(mean((altM$sims.list$Nin - altVals[[3]])/altVals[[3]])) * 100)
       
-    bias[2, 1, subiter, iter] <- realVals[[4]]
-    bias[2, 2, subiter, iter] <- realM$mean$Nintotal
-    bias[2, 3, subiter, iter] <- (abs(mean((realM$sims.list$Nintotal - realVals[[4]])/realVals[[4]])) * 100)
+    bias[2, 1, subiter, iter] <- twistyVals[[4]]
+    bias[2, 2, subiter, iter] <- twistyM$mean$Nintotal
+    bias[2, 3, subiter, iter] <- (abs(mean((twistyM$sims.list$Nintotal - twistyVals[[4]])/twistyVals[[4]])) * 100)
     bias[2, 4, subiter, iter] <- altVals[[4]]
     bias[2, 5, subiter, iter] <- altM$mean$Nintotal
     bias[2, 6, subiter, iter] <- (abs(mean((altM$sims.list$Nintotal - altVals[[4]])/altVals[[4]])) * 100)
       
     bias[3, 1, subiter, iter] <- N
-    bias[3, 2, subiter, iter] <- realM$mean$Nreal
-    bias[3, 3, subiter, iter] <- (abs(mean((realM$sims.list$Nreal - N)/N)) * 100)
+    bias[3, 2, subiter, iter] <- twistyM$mean$Ntwisty
+    bias[3, 3, subiter, iter] <- (abs(mean((twistyM$sims.list$Ntwisty - N)/N)) * 100)
     bias[3, 4, subiter, iter] <- N
-    bias[3, 5, subiter, iter] <- altM$mean$Nreal
-    bias[3, 6, subiter, iter] <- (abs(mean((altM$sims.list$Nreal - N)/N)) * 100)
+    bias[3, 5, subiter, iter] <- altM$mean$Ntwisty
+    bias[3, 6, subiter, iter] <- (abs(mean((altM$sims.list$Ntwisty - N)/N)) * 100)
       
     bias[4, 1, subiter, iter] <- Ntotal
-    bias[4, 2, subiter, iter] <- realM$mean$Nrealtotal
-    bias[4, 3, subiter, iter] <- (abs(mean((realM$sims.list$Nrealtotal - Ntotal)/Ntotal)) * 100)
+    bias[4, 2, subiter, iter] <- twistyM$mean$Ntwistytotal
+    bias[4, 3, subiter, iter] <- (abs(mean((twistyM$sims.list$Ntwistytotal - Ntotal)/Ntotal)) * 100)
     bias[4, 4, subiter, iter] <- Ntotal
-    bias[4, 5, subiter, iter] <- altM$mean$Nrealtotal
-    bias[4, 6, subiter, iter] <- (abs(mean((altM$sims.list$Nrealtotal - Ntotal)/Ntotal)) * 100)
+    bias[4, 5, subiter, iter] <- altM$mean$Ntwistytotal
+    bias[4, 6, subiter, iter] <- (abs(mean((altM$sims.list$Ntwistytotal - Ntotal)/Ntotal)) * 100)
       
     bias[5, 1, subiter, iter] <- sigma
-    bias[5, 2, subiter, iter] <- mean(realM$mean$sigma)
-    bias[5, 3, subiter, iter] <- (abs(mean((rowMeans(realM$sims.list$sigma) - sigma)/sigma)) * 100)
+    bias[5, 2, subiter, iter] <- mean(twistyM$mean$sigma)
+    bias[5, 3, subiter, iter] <- (abs(mean((rowMeans(twistyM$sims.list$sigma) - sigma)/sigma)) * 100)
     bias[5, 4, subiter, iter] <- sigma
     bias[5, 5, subiter, iter] <- mean(altM$mean$sigma)
     bias[5, 6, subiter, iter] <- (abs(mean((rowMeans(altM$sims.list$sigma) - sigma)/sigma)) * 100)
-    
-    #---------------------#
-    #-Overlap Correlation-#
-    #---------------------#
-    
-    overlapcor[iter, subiter] <- cor(OVA[,2], (abs(colMeans((realM$sims.list$sigma - sigma)/sigma)) * 100))
     
     #--------------------#
     #-Next sub iteration-#
@@ -722,13 +659,12 @@ system.time(while(iter <= niter){
 } #End main loop
 )
 
-summary.bias <- array(NA, dim = c(niter, 2))
-for(i in 1:niter){
-  for(j in 1:2){
-  summary.bias[i,1] <- mean(bias[5,3,,i])
-  summary.bias[i,2] <- mean(bias[5,6,,i])
-  }
-}
+save(bias, file ="sim.save.R")
 
-sim.save <- list(bias, overlapcor)
-dput(sim.save, file ="C:/Users/farrm/Documents/GitHub/CDSM/Simulations/sim.save.R")
+summary <- array(NA, dim = c(5,2))
+
+summary <- apply(bias[,c(3,6),,], MARGIN = c(1,2), FUN = mean)
+
+colnames(summary) <- c("Winding", "Straight")
+
+save(summary, file = "summary.R")
