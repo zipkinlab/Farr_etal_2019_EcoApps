@@ -15,7 +15,7 @@ Carnivore communities face unprecedented threats from humans. Management regimes
 ### [DataFormat](https://github.com/farrmt/HMSDS/tree/master/DataFormat): Contains code to format raw data for analysis and formatted data
 ### [PostAnalysis](https://github.com/farrmt/HMSDS/tree/master/PostAnalysis): Contains code to estimate posterior probabilities and to create figures
 ### [RawData](https://github.com/farrmt/HMSDS/tree/master/RawData): Contains CSV file of raw data
-### [SupportingInformation](https://github.com/farrmt/HMSDS/tree/master/SupportingInformation): Contains code to run simulation of survey design and code to generate supporting information
+### [SupportingInformation](https://github.com/farrmt/HMSDS/tree/master/SupportingInformation): Contains code to run simulation and code to generate supporting information
 
 ## Data
 See the following subdirectories for data and metadata: [RawData](https://github.com/farrmt/HMSDS/tree/master/RawData), [DataFormat](https://github.com/farrmt/HMSDS/tree/master/DataFormat)
