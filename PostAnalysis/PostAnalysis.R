@@ -198,9 +198,9 @@ Figure2 <- ggplot() +
   geom_errorbar(data = subset(values, L95 == TRUE), aes(x = species, ymin = l25.alpha, ymax = u75.alpha, color = "green"),
                 size = 3, width = 0) +
   annotate("text", x = 0.5, y = 3.375, hjust = 0, size = 7, family = "Times New Roman", 
-           label = "Greater in the disturbed Talek region") + 
+           label = "Greater under passive enforcement (Talek region)") + 
   annotate("text", x = 0.5, y = -3.375, hjust = 0, size = 7, family = "Times New Roman", 
-           label = "Greater in the undisturbed Mara Triangle") + 
+           label = "Greater under active enforcement (Mara Triangle)") + 
   coord_cartesian(ylim = c(-3.5, 3.5)) +
   geom_hline(yintercept = 0, alpha = 0.75) +
   geom_vline(xintercept = (which(values$species == "The Community") - 0.5), linetype = "dotted") +
@@ -265,9 +265,9 @@ Figure3 <- ggplot() +
   geom_errorbar(data = subset(values, L50 == TRUE), aes(x = species, ymin = l25.beta, ymax = u75.beta, color = "greengrey"),
                 size = 3, width = 0) +
   annotate("text", x = 0.5, y = 3.125, hjust = 0, size = 7, family = "Times New Roman", 
-           label = "Greater in the disturbed Talek region") + 
+           label = "Greater under passive enforcement (Talek region)") + 
   annotate("text", x = 0.5, y = -3.125, hjust = 0, size = 7, family = "Times New Roman", 
-           label = "Greater in the undisturbed Mara Triangle") + 
+           label = "Greater under active enforcement (Mara Triangle)") + 
   coord_cartesian(ylim = c(-3.25, 3.25)) +
   geom_hline(yintercept = 0, alpha = 0.75) +
   geom_vline(xintercept = (which(values$species == "The Community") - 0.5), linetype = "dotted") +
@@ -331,7 +331,7 @@ for(i in 1:5){
   Denplot[[i]]
 }
 
-Figure4 <- grid.arrange(textGrob(expression(Density~per~13~km^2), gp=gpar(fontfamily = "Times New Roman", fontsize = 14), rot = 90),
+Figure4 <- grid.arrange(textGrob(expression(Density~at~13~km^2), gp=gpar(fontfamily = "Times New Roman", fontsize = 14), rot = 90),
                         arrangeGrob(grobs = Denplot,  nrow = 1), ncol = 2, widths = c(0.05, 0.95))
 ggsave(file = "Figure4.png", plot = Figure4, width = 6.5, height = 3)
 
