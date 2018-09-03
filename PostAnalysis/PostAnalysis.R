@@ -178,25 +178,25 @@ Figure2 <- ggplot() +
   geom_errorbar(data = subset(values, nodiff == TRUE), aes(x = species, ymin = lower.alpha, ymax = upper.alpha, color = "black"), 
                 width = 0, size = 1.25) +
   geom_errorbar(data = subset(values, nodiff == TRUE), aes(x = species, ymin = l25.alpha, ymax = u75.alpha, color = "black"), 
-                width = 0, size = 3) +
+                width = 0, size = 3.5) +
   geom_errorbar(data = subset(values, H50 == TRUE), aes(x = species, ymin = mean.alpha, ymax = mean.alpha, color = "orangegrey"), 
                 width = 0.25) +
   geom_errorbar(data = subset(values, H50 == TRUE), aes(x = species, ymin = lower.alpha, ymax = upper.alpha, color = "orangegrey"), 
                 size = 1.25, width = 0) +
   geom_errorbar(data = subset(values, H50 == TRUE), aes(x = species, ymin = l25.alpha, ymax = u75.alpha, color = "orangegrey"), 
-                size = 3, width = 0) +
+                size = 3.5, width = 0) +
   geom_errorbar(data = subset(values, L50 == TRUE), aes(x = species, ymin = mean.alpha, ymax = mean.alpha, color = "greengrey"), 
                 width = 0.25) +
   geom_errorbar(data = subset(values, L50 == TRUE), aes(x = species, ymin = lower.alpha, ymax = upper.alpha, color = "greengrey"), 
                 size = 1.25, width = 0) +
   geom_errorbar(data = subset(values, L50 == TRUE), aes(x = species, ymin = l25.alpha, ymax = u75.alpha, color = "greengrey"), 
-                size = 3, width = 0) +
+                size = 3.5, width = 0) +
   geom_errorbar(data = subset(values, L95 == TRUE), aes(x = species, ymin = mean.alpha, ymax = mean.alpha, color = "green"),
                 width = 0.25) +
   geom_errorbar(data = subset(values, L95 == TRUE), aes(x = species, ymin = lower.alpha, ymax = upper.alpha, color = "green"),
                 size = 1.25, width = 0) +
   geom_errorbar(data = subset(values, L95 == TRUE), aes(x = species, ymin = l25.alpha, ymax = u75.alpha, color = "green"),
-                size = 3, width = 0) +
+                size = 3.5, width = 0) +
   annotate("text", x = 0.5, y = 3.375, hjust = 0, size = 7, family = "Times New Roman", 
            label = "Greater under passive enforcement (Talek region)") + 
   annotate("text", x = 0.5, y = -3.375, hjust = 0, size = 7, family = "Times New Roman", 
@@ -251,19 +251,19 @@ Figure3 <- ggplot() +
   geom_errorbar(data = subset(values, nodiff == TRUE), aes(x = species, ymin = lower.beta, ymax = upper.beta, color = "black"), 
                 width = 0, size = 1.25) +
   geom_errorbar(data = subset(values, nodiff == TRUE), aes(x = species, ymin = l25.beta, ymax = u75.beta, color = "black"), 
-                width = 0, size = 3) +
+                width = 0, size = 3.5) +
   geom_errorbar(data = subset(values, L95 == TRUE), aes(x = species, ymin = mean.beta, ymax = mean.beta, color = "green"), 
                 width = 0.25) +
   geom_errorbar(data = subset(values, L95 == TRUE), aes(x = species, ymin = lower.beta, ymax = upper.beta, color = "green"), 
                 size = 1.25, width = 0) +
   geom_errorbar(data = subset(values, L95 == TRUE), aes(x = species, ymin = l25.beta, ymax = u75.beta, color = "green"),
-                size = 3, width = 0) +
+                size = 3.5, width = 0) +
   geom_errorbar(data = subset(values, L50 == TRUE), aes(x = species, ymin = mean.beta, ymax = mean.beta, color = "greengrey"), 
                 width = 0.25) +
   geom_errorbar(data = subset(values, L50 == TRUE), aes(x = species, ymin = lower.beta, ymax = upper.beta, color = "greengrey"),
                 size = 1.25, width = 0) +
   geom_errorbar(data = subset(values, L50 == TRUE), aes(x = species, ymin = l25.beta, ymax = u75.beta, color = "greengrey"),
-                size = 3, width = 0) +
+                size = 3.5, width = 0) +
   annotate("text", x = 0.5, y = 3.125, hjust = 0, size = 7, family = "Times New Roman", 
            label = "Greater under passive enforcement (Talek region)") + 
   annotate("text", x = 0.5, y = -3.125, hjust = 0, size = 7, family = "Times New Roman", 
