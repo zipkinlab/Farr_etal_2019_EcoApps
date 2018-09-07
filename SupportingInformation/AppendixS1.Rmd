@@ -1,17 +1,23 @@
 ---
-title: "Supporting Information"
+title: "Appendix S1"
 output: 
   pdf_document:
     fig_caption: false
     
 ---
-# Appendix A: Simulation of winding survey bias
+# Matthew T. Farr, David S. Green, Kay E. Holekamp, Gary J. Roloff, and Elise F. Zipkin
+
+# Multi-species hierarchical modeling reveals variable responses of African carnivores to management alternatives
+
+# Ecological Applications
+
+# Simulation of winding survey bias
 
 Straight line survey routes were infeasible due to impassible terrain and off-road restrictions; thus surveys were designed to maximize coverage of the Talek region and Mara Triangle (Figure 1).
 
 
-![Figure1](../PostAnalysis/Figure1.png)
-**Figure 1.** Map of survey routes in the Talek and Mara Triangle management regions within the Masai Mara National Reserve, Kenya. Transect vehicle surveys were conducted at 4 to 6-week intervals from July 2012 to March 2014.
+![Figure S1.](../PostAnalysis/Figure1.png)
+**Figure S1.** Map of survey routes in the Talek and Mara Triangle management regions within the Masai Mara National Reserve, Kenya. Transect vehicle surveys were conducted at 4 to 6-week intervals from July 2012 to March 2014.
 
 The curvatures of winding surveys do not violate the assumption of distance sampling or pose a serious issue to estimating detection probabilities (Hiby & Krishna 2001). However, winding surveys may violate the assumption of random placement, which ensures a representative sample of distances to observations for estimation of detection probability (Buckland et al. 1993). We conducted a simulation study to examine any biases created by winding surveys and to compare performance to straight surveys with random placement. We checked for biases in the scale parameter, $\sigma$, for detection probability, the number of groups within (i.e., Groups within) the sampling boundary (i.e., transect width of 1300 m), the abundance (derived from mean number of groups and mean group size) within the sampling boundary (i.e., Abundance within) , the number of groups within the entire study region (i.e., Groups), and the abundance within the entire study region (i.e., Abundance).
 
@@ -21,7 +27,7 @@ We generated 100 datasets for simulating the locations of groups and group sizes
 
 The results of the simulation study show that the winding survey is slightly more biased (8.87 % more biased) for the number of groups within the sampling boundary (i.e., Groups within) when compared to the straight survey (Table 1). 
 
-**Table 1.** The mean relative biases (percent) for our 5 parameters of interest for the winding survey design and the straigh survey design when compared to the true values. 
+**Table S1.** The mean relative biases (percent) for our 5 parameters of interest for the winding survey design and the straigh survey design when compared to the true values. 
 ```{r, comment=NA, echo=FALSE}
 load(file = "summary.R")
 round(summary, digits = 2)
@@ -139,7 +145,7 @@ plot(Site15, add=T, col="coral2")
 plot(Site16, add=T, col="brown")
 plot(Site17, add=T, col="grey")
 ```
-**Figure 2.** Imported transect shapefiles for the winding survey. Each of the 17 transects is represented by a different color.
+**Figure S2.** Imported transect shapefiles for the winding survey. Each of the 17 transects is represented by a different color.
 
 Sample coordintaes from transect. Used to calculate distances of observed groups.
 ```{r}
@@ -185,7 +191,7 @@ plot(x=NULL, y=NULL, xlim=xlim, ylim=ylim,
      yaxt = "n", xaxt = "n", ylab = "", xlab = "")
 points(cbind(X, Y), pch = ".")
 ```
-**Figure 3.** Breaking continous winding survey into discrete points for calculation of distance from observation to transect.
+**Figure S3.** Breaking continous winding survey into discrete points for calculation of distance from observation to transect.
 
 
 Initialize values
@@ -530,7 +536,7 @@ plot(x=NULL, y=NULL, xlim=xlim, ylim=ylim,
      yaxt = "n", xaxt = "n", ylab = "", xlab = "")
 points(cbind(X,Y), col = "blue", pch = ".")
 ```
-**Figure 4.** Transects for straight survey design that have been discretized into points for distance sampling calculations.
+**Figure S4.** Transects for straight survey design that have been discretized into points for distance sampling calculations.
 
 Initialize values
 ```{r}
@@ -833,7 +839,7 @@ rownames(bias) <- c("Groups Within", "Abundance Within",
 
 ## Results
 
-**Table 2.** Estimates from winding survey model.
+**Table S2.** Estimates from winding survey model.
 ```{r, out.width=100, comment=NA, echo=FALSE}
 windingM$summary[,1:8]
 ```
@@ -863,10 +869,10 @@ points(cbind(u1, u2), col = "black", lwd = 1)
 points(windingVals[[1]], col = "green")
 points(windingVals[[2]], col = "red", pch = 20)
 ```
-**Figure 5.** Visualization of winding survey. Black circles indicate simulated observations not within sampling boundary. Green circles with no fill indicate observations within sampling boundary that were not detected. Green circles with red fill indicate observations within sampling boundary that were detected.
+**Figure S5.** Visualization of winding survey. Black circles indicate simulated observations not within sampling boundary. Green circles with no fill indicate observations within sampling boundary that were not detected. Green circles with red fill indicate observations within sampling boundary that were detected.
 
 
-**Table 3.** Estimates from straight survey model.
+**Table S3.** Estimates from straight survey model.
 ```{r, comment=NA, echo=FALSE}
 altM$summary[,1:8]
 ```
@@ -880,10 +886,10 @@ points(altVals[[5]], col = "blue", pch = ".")
 points(altVals[[1]], col = "green")
 points(altVals[[2]], col = "red", pch = 20)
 ```
-**Figure 6.** Visualization of straight survey. Black circles indicate simulated observations not within sampling boundary. Green circles with no fill indicate observations within sampling boundary that were not detected. Green circles with red fill indicate observations within sampling boundary that were detected.
+**Figure S6.** Visualization of straight survey. Black circles indicate simulated observations not within sampling boundary. Green circles with no fill indicate observations within sampling boundary that were not detected. Green circles with red fill indicate observations within sampling boundary that were detected.
 
 
-**Table 4.** Estimated and true values with associated relative bias for winding and straight surveys for a single dataset.
+**Table S4.** Estimated and true values with associated relative bias for winding and straight surveys for a single dataset.
 ```{r, out.width=100, comment=NA, echo=FALSE}
 bias
 ```
@@ -893,264 +899,3 @@ bias
 Buckland, S.T., Anderson, D.R., Burnham, K.P. & Laake, J.L. (1993) Distance Sampling: Estimating Abundance of Biological Populations. Oxford University Press, Oxford.
 
 Hiby, L. & Krishna, M.B. (2001) Line transect sampling from a curving path. Biometrics, 57, 727-731.
-
-\newpage
-
-# Appendix B: Multi-species distance sampling JAGS code
-
-    model{
-  
-    #--------#
-    #-PRIORS-#
-    #--------#
-
-    #Gamma0
-    mu_s ~ dunif(0, 8)            #Mean
-    tau_s <- 1/(sig_s * sig_s)    #Precision
-    sig_s ~ dunif(0, 8)           #Variance
-
-    #Sigma
-    gamma1 ~ dnorm(0, 0.01)       #Effect of body size
-    gamma2 ~ dnorm(0, 0.01)       #Effect of region
-    
-    #Alpha0
-    mu_a0 ~ dnorm(0, 0.01)        #Mean
-    tau_a0 ~ dgamma(0.1, 0.1)     #Precision
-    sig_a0 <- 1/sqrt(tau_a0)      #Variance
-
-    #Alpha1
-    mu_a1 ~ dnorm(0, 0.01)        #Mean
-    tau_a1 ~ dgamma(0.1, 0.1)     #Precision
-    sig_a1 <- 1/sqrt(tau_a1)      #Variance
-
-    #Beta1
-    mu_b1 ~ dnorm(0, 0.01)        #Mean
-    tau_b1 ~ dgamma(0.1, 0.1)     #Precision
-    sig_b1 <- 1/sqrt(tau_b1)      #Variance
-
-    #Overdispersion
-    r.N ~ dunif(0,100)            #Number of groups
-    r.G ~ dunif(0,100)            #Group size
-
-    for(s in social){
-
-    #Expected Group Size
-    beta0[s] ~ dunif(0,50)           #Intercept parameter
-    beta1[s] ~ dnorm(mu_b1, tau_b1)  #Effect parameter
-
-    } #end s loop
-    
-    for(s in 1:nspec){
-
-    #Psi
-    tau_p[s] ~ dgamma(0.1, 0.1)  #Precision
-    sig_p[s] <- 1/sqrt(tau_p[s]) #Variance
-    
-    #Sigma
-    gamma0[s] ~ dnorm(mu_s, tau_s)  #Intercept parameter
-    
-    #Expected Number of Groups
-    alpha0[s] ~ dnorm(mu_a0, tau_a0)    #Intercept parameter
-    alpha1[s] ~ dnorm(mu_a1, tau_a1)    #Effect parameter
-
-    for(j in 1:nsites){
-
-    psi[j,s] ~ dnorm(0, tau_p[s])       #Transect effect parameter
-
-    #Scale parameter
-    sigma[j,s] <- exp(gamma0[s] + gamma1 * size[s] + gamma2 * region[j])
-
-    #------------#
-    #-LIKELIHOOD-#
-    #------------#
-    
-    for(t in 1:nreps[j]){
-    
-    #Construct cell probabilities for nG cells using numerical integration
-    #Sum of the area (rectangles) under the detection function
-
-    for(k in 1:nD){
-    
-    #Half normal detection function at midpt (length of rectangle)
-    g[k,t,j,s] <- exp(-mdpt[k]*mdpt[k]/(2*sigma[j,s]*sigma[j,s]))
-    
-    #Proportion of each interval (width of rectangle) for both sides of the transect
-    pi[k,t,j,s] <- v/B
-    
-    #Detection probability for each distance class k (area of each rectangle)
-    f[k,t,j,s] <- g[k,t,j,s] * pi[k,t,j,s]
-    
-    #Conditional detection probability (scale to 1)
-    fc[k,t,j,s] <- f[k,t,j,s]/pcap[t,j,s]
-    
-    }#end k loop
-    
-    #Detection probability at each transect (sum of rectangles)
-    pcap[t,j,s] <- sum(f[1:nD,t,j,s])
-    
-    #Observed population @ each t,j,s (N-mixture)
-    y[t,j,s] ~ dbin(pcap[t,j,s], N[t,j,s])
-    
-    #Latent Number of Groups @ each t,j,s (negative binomial)
-    N[t,j,s] ~ dpois(lambda.star[t,j,s])
-    
-    #Expected Number of Groups
-    lambda.star[t,j,s] <- rho[t,j,s] * lambda[t,j,s]
-
-    #Overdispersion parameter for Expected Number of Groups
-    rho[t,j,s] ~ dgamma(r.N, r.N)
-
-    #Linear predictor for Expected Number of Groups
-    lambda[t,j,s] <- exp(alpha0[s] + alpha1[s] * region[j] + psi[j,s] + log(offset[j]))
-
-    }#end t loop
-
-    #Mean detection probability @ each j,s
-    psite[j,s] <- mean(pcap[1:nreps[j], j, s])
-
-    }#end j loop
-    
-    #Mean detection probability for each species
-    Dprop[s] <- mean(psite[1:nsites, s])
-
-    }#end s loop
-
-    #Mean detection probability for all t,j,s
-    TotalDprop <- mean(Dprop[])
-
-    for(s in social){
-    
-    for(j in 1:nsites){
-    
-    for(t in 1:nreps[j]){
-    
-    #Expected Group Size
-    gs.lam.star[t,j,s] <- gs.lam[t,j,s] * gs.rho[t,j,s]
-    
-    #Overdispersion parameter for Expected Group Size
-    gs.rho[t,j,s] ~ dgamma(r.G, r.G)
-    
-    #Linear predictor for Expected Group Size
-    gs.lam[t,j,s] <- exp(beta0[s] + beta1[s] * region[j] + log(offset[j])) 
-
-    }#end t loop
-
-    }#end j loop
-
-    }#end s loop
-    
-    for(i in 1:nobs){
-    
-    #Observed distance classes
-    dclass[i] ~ dcat(fc[1:nD, rep[i], site[i], spec[i]])
-
-    }#end i loop
-
-    for(i in 1:nsoc){
-
-    #Observed Group Size (zero truncated negative binomial)
-    gs[i] ~ dpois(gs.lam.star[s.rep[i], s.site[i], s.spec[i]]) T(1,)
-
-    }#end i loop
-    
-    for(s in social){
-    
-    for(j in 1:nsites){
-    
-    for(t in 1:nreps[j]){
-
-    #Abundance per transect
-    GSrep[t,j,s] <- lambda.star[t,j,s] * gs.lam.star[t,j,s]
-    
-    }#end t loop
-    
-    #Abundance per transect averaged over surveys
-    GSsite[j,s] <- mean(GSrep[1:nreps[j], j, s])
-    
-    }#end j loop
-    
-    #Mean abundance per transect
-    GS[s] <- mean(GSsite[1:nsites, s])   
-
-    #Abundance per transect for each region
-    RegGS[s,1] <- mean(GSsite[1:13, s])     #Mara Triangle
-    RegGS[s,2] <- mean(GSsite[14:17, s])    #Talek region
-    
-    }#end s loop
-    
-    }#end model
-    
-\newpage
-
-# Appendix C: Model Results
-Summary (mean, standard deviation, 95% credible interval [CI]) of parameter estimates from hierarchical multi-species distance sampling model. $\mu_{\sigma}$: mean of $\gamma0_s$; $\tau^2_{\sigma}$: variance of $\gamma0_s$; $\mu_{\alpha0}$: mean of $\alpha0_s$; $\tau^2_{\alpha0}$: variance of $\alpha0_s$; $\mu_{\alpha1}$: mean of $\alpha1_s$; $\tau^2_{\alpha1}$: variance of $\alpha1_s$; $\mu_{\beta1}$: mean of $\beta1_s$; $\tau^2_{\beta1}$: variance of $\beta1_s$; $\gamma0_s$: species-specific intercepts of $\sigma_{js}$; $\alpha0_s$: species-specific intercepts of $\lambda_{tjs}$; $\alpha1_s$: species-specific effects of management regime on $\lambda_{tjs}$; $\beta0_s$: species-specific intercepts of $\mu_{tjs}$; $\beta1_s$: species-specific effects of management regime on $\mu_{tjs}$; $\gamma1$: effect of body size on $\sigma_{js}$; $\gamma2$: effect of management regime on $\sigma_{js}$; $Density_{s,MT}$: species-specific density in Mara Triangle; $Density_{s,TR}$: species-specific density in the Talek region; AL: African lion; BM: banded mongoose; BEF: bat-eared fox; BBJ: black-backed jackal; CAR: caracal; CHE: cheetah; LEO: leopard; SER: serval; SSJ: side-striped jackal; SM: slender mongoose; SH: spotted hyena.
-
-Parameter | Mean | SD | 2.5% CI | 97.5% CI
---- | --- | --- | --- | --- 
-$\mu_{\sigma}$ | 4.13 | 0.22 | 3.66 | 4.53
-$\tau^2_{\sigma}$ | 0.6 | 0.25 | 0.27 | 1.2
-$\mu_{\alpha0}$ | -1.33 | 0.59 | -2.55 | -0.2
-$\tau^2_{\alpha0}$ | 1.71 | 0.52 | 0.97 | 2.97
-$\mu_{\alpha1}$ | -0.24 | 0.45 | -1.21 | 0.58
-$\tau^2_{\alpha1}$ | 0.95 | 0.42 | 0.35 | 1.98
-$\mu_{\beta1}$ | -0.65 | 0.37 | -1.48 | -0.03
-$\tau^2_{\beta1}$ | 0.65 | 0.36 | 0.24 | 1.59
-$\gamma0_{AL}$ | 3.98 | 0.59 | 2.82 | 5.18
-$\gamma0_{BM}$ | 4.28 | 0.17 | 3.95 | 4.61
-$\gamma0_{BEF}$ | 3.88 | 0.17 | 3.55 | 4.21
-$\gamma0_{BBJ}$ | 4.62 | 0.14 | 4.34 | 4.9
-$\gamma0_{CAR}$ | 3.77 | 0.56 | 2.61 | 4.79
-$\gamma0_{CHE}$ | 4.67 | 0.27 | 4.22 | 5.26
-$\gamma0_{LEO}$ | 3.6 | 0.53 | 2.49 | 4.57
-$\gamma0_{SER}$ | 4.03 | 0.25 | 3.56 | 4.56
-$\gamma0_{SSJ}$ | 4.4 | 0.32 | 3.84 | 5.09
-$\gamma0_{SM}$ | 3.56 | 0.38 | 2.8 | 4.25
-$\gamma0_{SH}$ | 4.59 | 0.1 | 4.41 | 4.79
-$\alpha0_{AL}$ | -0.59 | 0.26 | -1.14 | -0.13
-$\alpha0_{BM}$ | 0.54 | 0.35 | -0.21 | 1.13
-$\alpha0_{BEF}$ | -1.87 | 1.08 | -4.2 | 0.04
-$\alpha0_{BBJ}$ | 0.03 | 0.35 | -0.74 | 0.63
-$\alpha0_{CAR}$ | -3.05 | 1.12 | -5.57 | -1.04
-$\alpha0_{CHE}$ | -2.73 | 0.62 | -4.09 | -1.67
-$\alpha0_{LEO}$ | -2.71 | 0.99 | -4.81 | -0.89
-$\alpha0_{SER}$ | -1.36 | 0.54 | -2.56 | -0.42
-$\alpha0_{SSJ}$ | -2.91 | 0.79 | -4.64 | -1.57
-$\alpha0_{SM}$ | -1.06 | 0.71 | -2.5 | 0.33
-$\alpha0_{SH}$ | 0.99 | 0.21 | 0.55 | 1.38
-$\alpha1_{AL}$ | -1.2 | 0.58 | -2.38 | -0.1
-$\alpha1_{BM}$ | -0.19 | 0.53 | -1.24 | 0.89
-$\alpha1_{BEF}$ | -0.48 | 0.97 | -2.57 | 1.33
-$\alpha1_{BBJ}$ | 0.63 | 0.53 | -0.4 | 1.71
-$\alpha1_{CAR}$ | -0.61 | 1.04 | -3.05 | 1.12
-$\alpha1_{CHE}$ | 0.02 | 0.7 | -1.39 | 1.39
-$\alpha1_{LEO}$ | -0.73 | 1.02 | -3.18 | 0.93
-$\alpha1_{SER}$ | -0.68 | 0.79 | -2.45 | 0.68
-$\alpha1_{SSJ}$ | 0.18 | 0.8 | -1.38 | 1.81
-$\alpha1_{SM}$ | -0.27 | 0.72 | -1.81 | 1.07
-$\alpha1_{SH}$ | 0.65 | 0.39 | -0.13 | 1.43
-$\beta0_{AL}$ | 1.23 | 0.14 | 0.95 | 1.51
-$\beta0_{BM}$ | 2.43 | 0.12 | 2.2 | 2.66
-$\beta0_{BEF}$ | 0.92 | 0.17 | 0.58 | 1.27
-$\beta0_{BBJ}$ | 0.26 | 0.15 | 0.02 | 0.59
-$\beta0_{CHE}$ | 0.33 | 0.28 | 0.01 | 1.02
-$\beta0_{SM}$ | 0.37 | 0.29 | 0.01 | 1.07
-$\beta0_{SH}$ | 0.11 | 0.08 | 0 | 0.31
-$\beta1_{AL}$ | -0.93 | 0.52 | -2.07 | -0.03
-$\beta1_{BM}$ | -0.4 | 0.22 | -0.82 | 0.04
-$\beta1_{BEF}$ | -0.99 | 0.63 | -2.45 | 0.03
-$\beta1_{BBJ}$ | -0.7 | 0.28 | -1.27 | -0.18
-$\beta1_{CHE}$ | -0.6 | 0.55 | -1.78 | 0.4
-$\beta1_{SM}$ | -0.97 | 0.77 | -2.84 | 0.19
-$\beta1_{SH}$ | 0.03 | 0.17 | -0.31 | 0.36
-$\gamma1$ | 0.52 | 0.07 | 0.39 | 0.65
-$\gamma2$ | 0.43 | 0.22 | -0.01 | 0.87
-$Density_{AL,MT}$ | 2.23 | 0.5 | 1.41 | 3.36
-$Density_{BM,MT}$ | 28.21 | 5.21 | 19.17 | 39.65
-$Density_{BEF,MT}$ | 7.73 | 1.77 | 4.75 | 11.63
-$Density_{BBJ,MT}$ | 1.86 | 0.42 | 1.18 | 2.81
-$Density_{SH,MT}$ | 3.49 | 0.45 | 2.71 | 4.46
-$Density_{AL,TR}$ | 0.35 | 0.24 | 0.07 | 0.95
-$Density_{BM,TR}$ | 24.37 | 6.4 | 14.06 | 39.1
-$Density_{BEF,TR}$ | 0.66 | 0.57 | 0.07 | 2.15
-$Density_{BBJ,TR}$ | 2.4 | 0.69 | 1.29 | 3.95
-$Density_{SH,TR}$ | 10.63 | 1.53 | 7.92 | 13.86

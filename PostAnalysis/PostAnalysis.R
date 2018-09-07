@@ -66,13 +66,13 @@ rownames(table1) <- c("African Lion", "Banded Mongoose", "Bat-eared Fox", "Black
 
 write.csv(table1, file = "Table1.csv")
 
-#----------------#
-#-Appendix Table-#
-#----------------#
+#-----------------------#
+#-Appendix S3: Table S1-#
+#-----------------------#
 
-tableA <- HMSDS$summary[,-c(4:6,8:11)]
-tableA <- round(tableA, digits = 2)
-write.csv(tableA, file = "TableA.csv")
+tableS1 <- HMSDS$summary[,-c(4:6,8:11)]
+tableS1 <- round(tableS1, digits = 2)
+write.csv(tableS1, file = "AppendixS3TableS1.csv")
 
 #---------#
 #-Results-#
