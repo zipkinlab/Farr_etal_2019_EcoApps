@@ -17,9 +17,9 @@ Straight line survey routes were infeasible due to impassible terrain and off-ro
 
 
 ![Figure S1.](../PostAnalysis/Figure1.png)
-**Figure S1.** Map of survey routes in the Talek and Mara Triangle management regions within the Masai Mara National Reserve, Kenya. Transect vehicle surveys were conducted at 4 to 6-week intervals from July 2012 to March 2014.
+**Figure S1.** Map of survey routes in the Talek and Mara Triangle management regions within the Masai Mara National Reserve, Kenya. Transect vehicle surveys were conducted at 4 to 6 week intervals from July 2012 to March 2014.
 
-The curvatures of winding surveys do not violate the assumption of distance sampling or pose a serious issue to estimating detection probabilities (Hiby & Krishna 2001). However, winding surveys may violate the assumption of random placement, which ensures a representative sample of distances to observations for estimation of detection probability (Buckland et al. 1993). We conducted a simulation study to examine any biases created by winding surveys and to compare performance to straight surveys with random placement. We checked for biases in the scale parameter, $\sigma$, for detection probability, the number of groups within (i.e., Groups within) the sampling boundary (i.e., transect width of 1300 m), the abundance (derived from mean number of groups and mean group size) within the sampling boundary (i.e., Abundance within) , the number of groups within the entire study region (i.e., Groups), and the abundance within the entire study region (i.e., Abundance).
+The curvatures of winding surveys do not violate the assumption of distance sampling or pose a serious issue to estimating detection probabilities (Hiby & Krishna 2001). However, winding surveys may violate the assumption of random placement, which ensures a representative sample of distances to observations for estimation of detection probability (Buckland et al. 1993). We conducted a simulation study to examine any biases created by winding surveys and to compare performance to straight surveys with random placement. We checked for biases in the scale parameter, $\sigma$, for detection probability, the number of groups within (i.e., Groups within) the sampling boundary (i.e., transect width of 1300 m), the abundance (derived from mean number of groups and mean group size) within the sampling boundary (i.e., Abundance within), the number of groups within the entire study region (i.e., Groups), and the abundance within the entire study region (i.e., Abundance).
 
 To do this, we generate count data for a single species across the study region by simulating the location of groups assuming a uniform distribution for the intensity of groups. We then simulate group sizes for each group following the model in the main text. We sample from the simulated data using distance sampling with both winding and staight survey designs. We then compare the relative biases of the estimated parameters and the true parameters between winding and straight survey designs using a hierarchical distance sampling model (i.e., does not include a multi-species component).
 
@@ -49,7 +49,7 @@ set.seed(1985)
 ```
 
 Load R packages
-```{r results="hide", message=FALSE}
+```{r results="hide", message=FALSE, warning=FALSE}
 library(rgdal)
 library(sp)
 library(dplyr)
@@ -358,7 +358,7 @@ A.site <- as.vector(c(11.6542, 11.9619, 12.4702, 12.5182, 10.7843, 10.2384, 10.7
                       11.5376, 14.8511, 14.0352))
 ```
 
-BUGS Model
+JAGS Model
 ```{r}
 cat("
     model{ 
@@ -472,7 +472,7 @@ cat("
     }",fill=TRUE, file="HMSDS_model.txt")
 ```
 
-Compile BUGS data
+Compile JAGS data
 ```{r}
 #Input data
 str(windingD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
@@ -497,7 +497,7 @@ nt <- 4
 ```
 
 Run model
-```{r, message=FALSE}
+```{r, message=FALSE, results="hide"}
 windingM <- jags(data = windingD, model.file = "HMSDS_model.txt",
                  inits = inits, parameters.to.save = params, 
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt)
@@ -694,7 +694,7 @@ nobs <- sum(yobs)
 gs <- Dcap[,5]
 ```
 
-Compile BUGS data. Reuse BUGS model, parameters to save, and MCMC settings.
+Compile JAGS data. Reuse JAGS model, parameters to save, and MCMC settings.
 ```{r}
 #Input data
 str(altD <- list(nG = nG, v = v, site = site, y = yobs, B = B, midpt = midpt,
@@ -707,8 +707,8 @@ N.in <- yobs + 1
 inits <- function(){list(N = N.in, sigma = runif(10, 50, 350))}
 ```
 
-Run BUGS model
-```{r, message=FALSE}
+Run JAGS model
+```{r, message=FALSE, results="hide"}
 altM <- jags(data = altD, model.file = "HMSDS_model.txt",
              inits = inits, parameters.to.save = params, 
              n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt)
