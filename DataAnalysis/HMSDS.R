@@ -268,3 +268,12 @@ nt <- 10
 HMSDS <- jags(data = data, inits = inits, parameters.to.save = params, model.file = "HMSDS.txt", 
                          n.chains = nc, n.iter = ni, n.burnin = nb, n.thin = nt, parallel = TRUE)
 
+save(HMSDS, file = "HMSDS.Rdata")
+
+#------------#
+#-References-#
+#------------#
+
+#Kéry, M. & Royle, J.A. (2016) Applied hierarchical modeling in ecology: Analysis of distribution, abundance and species richness in R and BUGS (volume 1 – prelude and static models), Elsevier, Amsterdam.
+
+#Sollmann, R., Gardner, B., Williams, K.A., Gilbert, A.T. & Veit, R.R. (2016) A hierarchical distance sampling model to estimate abundance and covariate associations of species and communities. Methods in Ecology and Evolution, 7, 529–537.
