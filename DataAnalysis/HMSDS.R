@@ -115,7 +115,7 @@ cat("
 
     for(k in 1:nD){
     
-    #Half normal detection function at midpt (length of rectangle)
+    #Half-normal detection function at midpt (length of rectangle)
     g[k,t,j,s] <- exp(-mdpt[k]*mdpt[k]/(2*sigma[j,s]*sigma[j,s]))
     
     #Proportion of each interval (width of rectangle) for both sides of the transect

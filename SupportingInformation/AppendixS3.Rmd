@@ -7,7 +7,7 @@ output:
 ---
 # Matthew T. Farr, David S. Green, Kay E. Holekamp, Gary J. Roloff, and Elise F. Zipkin
 
-# Multi-species hierarchical modeling reveals variable responses of African carnivores to management alternatives
+# Multispecies hierarchical modeling reveals variable responses of African carnivores to management alternatives
 
 # Ecological Applications
 
