@@ -7,7 +7,7 @@ output:
 ---
 # Matthew T. Farr, David S. Green, Kay E. Holekamp, Gary J. Roloff, and Elise F. Zipkin
 
-# Multi-species hierarchical modeling reveals variable responses of African carnivores to management alternatives
+# Multispecies hierarchical modeling reveals variable responses of African carnivores to management alternatives
 
 # Ecological Applications
 
@@ -21,23 +21,23 @@ Straight line survey routes were infeasible due to impassible terrain and off-ro
 
 The curvatures of winding surveys do not violate the assumption of distance sampling or pose a serious issue to estimating detection probabilities (Hiby & Krishna 2001). However, winding surveys may violate the assumption of random placement, which ensures a representative sample of distances to observations for estimation of detection probability (Buckland et al. 1993). We conducted a simulation study to examine any biases created by winding surveys and to compare performance to straight surveys with random placement. We checked for biases in the scale parameter, $\sigma$, for detection probability, the number of groups within (i.e., Groups within) the sampling boundary (i.e., transect width of 1300 m), the abundance (derived from mean number of groups and mean group size) within the sampling boundary (i.e., Abundance within), the number of groups within the entire study region (i.e., Groups), and the abundance within the entire study region (i.e., Abundance).
 
-To do this, we generate count data for a single species across the study region by simulating the location of groups assuming a uniform distribution for the intensity of groups. We then simulate group sizes for each group following the model in the main text. We sample from the simulated data using distance sampling with both winding and staight survey designs. We then compare the relative biases of the estimated parameters and the true parameters between winding and straight survey designs using a hierarchical distance sampling model (i.e., does not include a multi-species component).
+To do this, we generate count data for a single species across the study region by simulating the location of groups assuming a uniform distribution for the intensity of groups. We then simulate group sizes for each group following the model in the main text. We sample from the simulated data using distance sampling with both winding and straight survey designs. We then compare the relative biases of the estimated parameters and the true parameters between winding and straight survey designs using a hierarchical distance sampling model (i.e., does not include a multi-species component).
 
 We generated 100 datasets for simulating the locations of groups and group sizes and resampled each sampling design 10 times for a total of 1000 simulations for each sampling design. For each dataset, observations (groups not individuals) were distributed uniformly across the sampling area. Group sizes were then simulated for each group. Then each dataset of uniformly distributed observations was resampled 10 times. 
 
 The results of the simulation study show that the winding survey is slightly more biased (8.87 % more biased) for the number of groups within the sampling boundary (i.e., Groups within) when compared to the straight survey (Table 1). 
 
-**Table S1.** The mean relative biases (percent) for our 5 parameters of interest for the winding survey design and the straigh survey design when compared to the true values. 
+**Table S1.** The mean relative biases (percent) for our 5 parameters of interest for the winding survey design and the straight survey design when compared to the true values. 
 ```{r, comment=NA, echo=FALSE}
 load(file = "summary.R")
 round(summary, digits = 2)
 ```
 
-This also holds true (winding surveys were 6.44% more biased) for the number of groups within the enitre study region (i.e., Groups). However, abundance within the sampling boundary (i.e., Abundance within) and for the entire study region (i.e., Abundance) were similar between the two survey methods, and there was no increase in bias for the scale parameter, $\sigma$, which influenced detection. We concluded that the winding survey design did not have a signifcant enough increase in bias to impact our results. Additionally, we assume that any potential biases caused by winding transects would have a similar influence in both management regions and would only affect absolute, but not relative, abundance estimates (summary of results, including the remaining tables and figures, are presented after the annotated code).
+This also holds true (winding surveys were 6.44% more biased) for the number of groups within the entire study region (i.e., Groups). However, abundance within the sampling boundary (i.e., Abundance within) and for the entire study region (i.e., Abundance) were similar between the two survey methods, and there was no increase in bias for the scale parameter, $\sigma$, which influenced detection. We concluded that the winding survey design did not have a significant enough increase in bias to impact our results. Additionally, we assume that any potential biases caused by winding transects would have a similar influence in both management regions and would only affect absolute, but not relative, abundance estimates (summary of results, including the remaining tables and figures, are presented after the annotated code).
 
 Below is the annotated code for the simulation study for a single simulation. To see complete code for the simulation study, please go to [GitHub](https://github.com/farrmt/HMSDS/blob/master/SupportingInformation/Simulation.R).
 
-```{r set-opitions, echo=FALSE}
+```{r set-options, echo=FALSE}
 options(width = 100)
 ```
 
@@ -82,7 +82,7 @@ cs <- rpois(N, lambda.group) + 1
 #Abundance
 Ntotal <- sum(cs)
 
-#Half normal scale parameter
+#Half-normal scale parameter
 sigma <- 300
 
 #Mid point of each distance class
@@ -147,7 +147,7 @@ plot(Site17, add=T, col="grey")
 ```
 **Figure S2.** Imported transect shapefiles for the winding survey. Each of the 17 transects is represented by a different color.
 
-Sample coordintaes from transect. Used to calculate distances of observed groups.
+Sample coordinates from transect. Used to calculate distances of observed groups.
 ```{r}
 s1p <- spsample(Site1, 30, type = "regular")
 s2p <- spsample(Site2, 30, type = "regular")
@@ -191,7 +191,7 @@ plot(x=NULL, y=NULL, xlim=xlim, ylim=ylim,
      yaxt = "n", xaxt = "n", ylab = "", xlab = "")
 points(cbind(X, Y), pch = ".")
 ```
-**Figure S3.** Breaking continous winding survey into discrete points for calculation of distance from observation to transect.
+**Figure S3.** Breaking continuous winding survey into discrete points for calculation of distance from observation to transect.
 
 
 Initialize values
@@ -258,10 +258,10 @@ for(i in 1:N){
 
 Harvest simulated data
 ```{r}
-#Dataframe that includes information on all groups
+#Data frame that includes information on all groups
 Dtot <- cbind(y, index, u1, u2, site, cs)
 
-#Dataframe containing only groups within 650 meters to transect
+#Data frame containing only groups within 650 meters to transect
 Din <- Dtot[complete.cases(Dtot),]
 
 #Number of groups within 650 meters
@@ -308,7 +308,7 @@ for(i in 1:Nin){
 
 Harvest simulated data
 ```{r}
-#Add distance class, detection probability, and detection index to dataframe
+#Add distance class, detection probability, and detection index to data frame
 Din <- cbind(Din[,2:6],dclass, p, ncap)
 
 #Undetected groups as NAs
@@ -317,7 +317,7 @@ for(i in 1:Nin){
     Din[i,8] <- NA
 }
 
-#Dataframe of detected inidividuals
+#Data frame of detected individuals
 Dcap <- Din[complete.cases(Din),]
 
 #Create observed number of groups per site
@@ -396,7 +396,7 @@ cat("
     #Construct cell probabilities for nG cells
     for(k in 1:nG){  
     
-    #Half normal detection function at midpt (length of rectangle)
+    #Half-normal detection function at midpt (length of rectangle)
     p[k,j] <- exp(- midpt[k] * midpt[k] / (2 * sigma[j] * sigma[j])) 
     
     #Probability of x in each interval (width of rectangle)
@@ -602,10 +602,10 @@ for(i in 1:N){
 
 Harvest simulated data
 ```{r}
-#Dataframe that includes information on all groups
+#Data frame that includes information on all groups
 Dtot <- cbind(y, index, u1, u2, site, cs)
 
-#Dataframe containing only groups within 650 meters to transect
+#Data frame containing only groups within 650 meters to transect
 Din <- Dtot[complete.cases(Dtot),]
 
 #Number of groups within 650 meters
@@ -652,7 +652,7 @@ for(i in 1:Nin){
 
 Harvest simulated data
 ```{r}
-#Add distance class, detection probability, and detection index to dataframe
+#Add distance class, detection probability, and detection index to data frame
 Din <- cbind(Din[,2:6],dclass, p, ncap)
 
 #Undetected groups as NAs
@@ -661,7 +661,7 @@ for(i in 1:Nin){
     Din[i,8] <- NA
 }
 
-#Dataframe of detected inidividuals
+#Data frame of detected individuals
 Dcap <- Din[complete.cases(Din),]
 
 #Create observed number of groups per site
@@ -725,7 +725,7 @@ rm(X, Y, nsites, J, si, di, dclass, dst, q,
    N.in, inits)
 ```
 
-Absoulte relative bias estimates
+Absolute relative bias estimates
 ```{r}
 bias <- t(matrix(data = c(
 

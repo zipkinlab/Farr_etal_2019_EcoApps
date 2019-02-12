@@ -217,7 +217,7 @@ Figure2 <- ggplot() +
                               "Side-striped Jackal" = "Side-striped\njackal", "Slender Mongoose" = "Slender\nmongoose", "Spotted Hyena" = "Spotted\nhyena",
                               "The Community" = "The\nCommunity")) +
   labs(y = expression("Management effect"), x = expression())
-  
+
 ggsave(file = "Figure2.png", bg = "transparent", width = 12, height = 6)
 
 #----------#

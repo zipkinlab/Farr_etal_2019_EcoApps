@@ -34,7 +34,7 @@
     #Construct cell probabilities for nG cells
     for(k in 1:nG){  
     
-    #Half normal detection function at midpt (length of rectangle)
+    #Half-normal detection function at midpt (length of rectangle)
     p[k,j] <- exp(- midpt[k] * midpt[k] / (2 * sigma[j] * sigma[j])) 
     
     #Probability of x in each interval (width of rectangle)
