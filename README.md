@@ -2,7 +2,7 @@
 
 ### [Matthew T. Farr](https://farrmt.github.io/), [David S. Green](https://inr.oregonstate.edu/people/david-green), [Kay E. Holekamp](http://www.holekamplab.org/), [Gary J. Roloff](https://www.afwelsite.com/), & [Elise F. Zipkin](https://msu.edu/user/ezipkin/)
 
-### Ecological Applications (2019)
+### Ecological Applications
 
 ### Code/Data DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1413562.svg)](https://doi.org/10.5281/zenodo.1413562)
 
