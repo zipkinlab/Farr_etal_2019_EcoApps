@@ -1,2 +1,2 @@
 # Directory Information
-Transect shapefiles to be loaded in both [Simulation.R](https://github.com/farrmt/HMSDS/blob/master/SupportingInformation/Simulation.R)  and [SupportingInformation.Rmd](https://github.com/farrmt/HMSDS/blob/master/SupportingInformation/SupportingInformation.Rmd).
+Transect shapefiles to be loaded in both [Simulation.R](../Simulation.R) and [SupportingInformation.Rmd](..n/SupportingInformation.Rmd).
